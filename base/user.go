@@ -1,4 +1,4 @@
-package model
+package base
 
 type User struct {
 	BaseEntity

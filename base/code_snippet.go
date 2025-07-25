@@ -1,4 +1,4 @@
-package model
+package base
 
 type CodeSnippet struct {
 	BaseEntity
