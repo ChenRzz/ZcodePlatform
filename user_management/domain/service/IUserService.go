@@ -5,16 +5,17 @@ import (
 	"MScProject/user_management/domain/repository"
 	"errors"
 	"golang.org/x/crypto/bcrypt"
+	"gorm.io/gorm"
 	"regexp"
 )
 
 type IUserService interface {
-	Register(username, password, email string) error
-	LogOff(userid int, password string) (bool, error)
-	Login(username, password string) (uint, error)
-	ChangeUserPassword(userid uint, oldPassword, newPassword string) error
-	GetUserInfo(userid uint) (username, email string, err error)
-	AdminResetPassword(userid uint, password string) error
+	Register(db *gorm.DB, username, password, email string) error
+	LogOff(db *gorm.DB, userid uint, password string) error
+	Login(db *gorm.DB, username, password string) (bool, error, uint)
+	ChangeUserPassword(db *gorm.DB, userid uint, oldPassword, newPassword string) error
+	GetUserInfo(db *gorm.DB, userid uint) (username, email string, err error)
+	AdminResetPassword(db *gorm.DB, userid uint, password string) error
 }
 
 type UserService struct {
@@ -25,15 +26,15 @@ func NewUserService(userRepository repository.IUserRepository) *UserService {
 	return &UserService{userRepository}
 }
 
-func (u *UserService) Register(username, password, email string) error {
+func (u *UserService) Register(db *gorm.DB, username, password, email string) error {
 	userRegex := `^[a-zA-Z0-9]+$`
 	matched, err := regexp.MatchString(userRegex, username)
 	if err != nil || !matched {
-		return errors.New("Username should only contain a-z, A-Z and 0-9")
+		return errors.New("UsernameInfo should only contain a-z, A-Z and 0-9")
 	}
-	usr, _ := u.UserRepository.FindByUsername(username)
+	usr, _ := u.UserRepository.FindByUsername(db, username)
 	if usr != nil {
-		return errors.New("Username has already been used")
+		return errors.New("UsernameInfo has already been used")
 	}
 	passwordRegex := `^[a-zA-Z0-9]+$`
 	matched, err = regexp.MatchString(passwordRegex, password)
@@ -45,26 +46,26 @@ func (u *UserService) Register(username, password, email string) error {
 		return err
 	}
 	var newUser = entity.User{Username: username, Password: string(hashPassword), Email: email}
-	if err := u.UserRepository.CreateUser(&newUser); err != nil {
+	if err := u.UserRepository.CreateUser(db, &newUser); err != nil {
 		return err
 	}
 	return nil
 }
 
-func (u *UserService) Login(username, password string) (uint, error) {
-	usr, err := u.UserRepository.FindByUsername(username)
+func (u *UserService) Login(db *gorm.DB, username, password string) (bool, error, uint) {
+	usr, err := u.UserRepository.FindByUsername(db, username)
 	if err != nil {
-		return 0, err
+		return false, err, 0
 	}
 	err = bcrypt.CompareHashAndPassword([]byte(usr.Password), []byte(password))
 	if err != nil {
-		return 0, errors.New("Password is incorrect")
+		return false, errors.New("Password is incorrect"), 0
 	}
-	return usr.ID, nil
+	return true, nil, usr.ID
 }
 
-func (u *UserService) ChangeUserPassword(userid uint, oldPassword, newPassword string) error {
-	usr, err := u.UserRepository.FindByID(userid)
+func (u *UserService) ChangeUserPassword(db *gorm.DB, userid uint, oldPassword, newPassword string) error {
+	usr, err := u.UserRepository.FindByID(db, userid)
 	if err != nil {
 		return err
 	}
@@ -82,38 +83,38 @@ func (u *UserService) ChangeUserPassword(userid uint, oldPassword, newPassword s
 		return err
 	}
 	usr.Password = string(hashPassword)
-	err = u.UserRepository.UpdateUser(usr)
+	err = u.UserRepository.UpdateUser(db, usr)
 	if err != nil {
 		return err
 	}
 	return nil
 }
 
-func (u *UserService) GetUserInfo(userid uint) (username, email string, err error) {
-	usr, err := u.UserRepository.FindByID(userid)
+func (u *UserService) GetUserInfo(db *gorm.DB, userid uint) (username, email string, err error) {
+	usr, err := u.UserRepository.FindByID(db, userid)
 	if err != nil {
 		return "", "", err
 	}
 	return usr.Username, usr.Email, nil
 }
-func (u *UserService) LogOff(userid uint, password string) (bool, error) {
-	usr, err := u.UserRepository.FindByID(userid)
+func (u *UserService) LogOff(db *gorm.DB, userid uint, password string) error {
+	usr, err := u.UserRepository.FindByID(db, userid)
 	if err != nil {
-		return false, err
+		return err
 	}
 	err = bcrypt.CompareHashAndPassword([]byte(usr.Password), []byte(password))
 	if err != nil {
-		return false, errors.New("Please enter correct password")
+		return errors.New("Please enter correct password")
 	}
-	err = u.UserRepository.DeleteUser(userid)
+	err = u.UserRepository.DeleteUser(db, userid)
 	if err != nil {
-		return false, err
+		return err
 	}
-	return true, nil
+	return nil
 }
 
-func (u *UserService) AdminResetPassword(userid uint, password string) error {
-	usr, err := u.UserRepository.FindByID(userid)
+func (u *UserService) AdminResetPassword(db *gorm.DB, userid uint, password string) error {
+	usr, err := u.UserRepository.FindByID(db, userid)
 	if err != nil {
 		return err
 	}
@@ -124,6 +125,6 @@ func (u *UserService) AdminResetPassword(userid uint, password string) error {
 	}
 	hashPassword, err := bcrypt.GenerateFromPassword([]byte(password), bcrypt.DefaultCost)
 	usr.Password = string(hashPassword)
-	err = u.UserRepository.UpdateUser(usr)
+	err = u.UserRepository.UpdateUser(db, usr)
 	return err
 }

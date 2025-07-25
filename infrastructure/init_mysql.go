@@ -22,15 +22,15 @@ func InitDB() {
 	var err error
 	db, err = gorm.Open(mysql.Open(dsn), &gorm.Config{})
 	if err != nil {
-		log.Fatalf("数据库连接失败：%v", err)
+		log.Fatalf("failed to connect Databases：%v", err)
 	}
-	fmt.Println("数据库连接成功！")
+	fmt.Println("Databases connect successful")
 }
 
 func InitSchema(db *gorm.DB) {
 	content, err := os.ReadFile("sql/schema.sql")
 	if err != nil {
-		log.Fatalf("❌ 读取 schema.sql 失败: %v", err)
+		log.Fatalf("Failed to load schema.sql: %v", err)
 	}
 	statements := strings.Split(string(content), ";")
 	for _, stmt := range statements {
@@ -39,10 +39,10 @@ func InitSchema(db *gorm.DB) {
 			continue
 		}
 		if err := db.Exec(stmt).Error; err != nil {
-			log.Fatalf("❌ 执行 SQL 失败: %v\nSQL: %s", err, stmt)
+			log.Fatalf("Failed to execute SQL: %v\nSQL: %s", err, stmt)
 		}
 	}
-	fmt.Println("✅ 数据表结构初始化完成")
+	fmt.Println("Databases init success")
 }
 
 func GetDB() *gorm.DB {

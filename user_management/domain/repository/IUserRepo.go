@@ -8,63 +8,62 @@ import (
 )
 
 type IUserRepository interface {
-	FindByUsername(username string) (*entity.User, error)
-	FindByID(UserID uint) (*entity.User, error)
-	FindByEmail(UserEmail string) (*entity.User, error)
-	CreateUser(user *entity.User) error
-	UpdateUser(user *entity.User) error
-	DeleteUser(UserID uint) error
+	FindByUsername(db *gorm.DB, username string) (*entity.User, error)
+	FindByID(db *gorm.DB, UserID uint) (*entity.User, error)
+	FindByEmail(db *gorm.DB, UserEmail string) (*entity.User, error)
+	CreateUser(db *gorm.DB, user *entity.User) error
+	UpdateUser(db *gorm.DB, user *entity.User) error
+	DeleteUser(db *gorm.DB, UserID uint) error
 }
 
 type UserRepoMsql struct {
-	db *gorm.DB
 }
 
-func NewUserRepoMsql(db *gorm.DB) *UserRepoMsql {
-	return &UserRepoMsql{db}
+func NewUserRepoMsql() *UserRepoMsql {
+	return &UserRepoMsql{}
 }
 
-func (u *UserRepoMsql) FindByUsername(username string) (*entity.User, error) {
+func (u *UserRepoMsql) FindByUsername(db *gorm.DB, username string) (*entity.User, error) {
 	var usr entity.User
-	err := u.db.Where("username = ?", username).First(&usr).Error
+	err := db.Where("username = ?", username).First(&usr).Error
 	if err != nil {
 		return nil, errors.New("user not found")
 	}
 	return &usr, nil
 }
-func (u *UserRepoMsql) FindByID(userID uint) (*entity.User, error) {
+func (u *UserRepoMsql) FindByID(db *gorm.DB, userID uint) (*entity.User, error) {
 	var usr entity.User
-	err := u.db.Where("ID = ?", userID).First(&usr).Error
+	err := db.Where("ID = ?", userID).First(&usr).Error
 	if err != nil {
 		return nil, errors.New("user not found")
 	}
 	return &usr, nil
 }
-func (u *UserRepoMsql) FindByEmail(UserEmail string) (*entity.User, error) {
+func (u *UserRepoMsql) FindByEmail(db *gorm.DB, UserEmail string) (*entity.User, error) {
 	var usr entity.User
-	err := u.db.Where("Email = ?", UserEmail).First(&usr).Error
+	err := db.Where("Email = ?", UserEmail).First(&usr).Error
 	if err != nil {
 		return nil, errors.New("user not found")
 	}
 	return &usr, nil
 }
-func (u *UserRepoMsql) CreateUser(user *entity.User) error {
-	err := u.db.Create(user).Error
+func (u *UserRepoMsql) CreateUser(db *gorm.DB, user *entity.User) error {
+	err := db.Create(user).Error
 	if err != nil {
 		return errors.New("Failed to create user")
 	}
 	return nil
 }
-func (u *UserRepoMsql) UpdateUser(user *entity.User) error {
-	err := u.db.Save(user).Error
+func (u *UserRepoMsql) UpdateUser(db *gorm.DB, user *entity.User) error {
+	err := db.Save(user).Error
 	if err != nil {
 		return errors.New("Failed to Update user")
 	}
 	return nil
 }
-func (u *UserRepoMsql) DeleteUser(UserID uint) error {
+func (u *UserRepoMsql) DeleteUser(db *gorm.DB, UserID uint) error {
 	var usr entity.User
-	err := u.db.Model(usr).Updates(
+	err := db.Model(usr).Updates(
 		map[string]interface{}{
 			"is_deleted": gorm.Expr("id"),
 			"deleted_at": time.Now(),
