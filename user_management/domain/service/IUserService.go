@@ -15,7 +15,7 @@ type IUserService interface {
 	Login(db *gorm.DB, username, password string) (bool, error, uint)
 	ChangeUserPassword(db *gorm.DB, userid uint, oldPassword, newPassword string) error
 	GetUserInfo(db *gorm.DB, userid uint) (username, email string, err error)
-	AdminResetPassword(db *gorm.DB, userid uint, password string) error
+	AdminResetPassword(db *gorm.DB, username string, password string) error
 }
 
 type UserService struct {
@@ -113,8 +113,8 @@ func (u *UserService) LogOff(db *gorm.DB, userid uint, password string) error {
 	return nil
 }
 
-func (u *UserService) AdminResetPassword(db *gorm.DB, userid uint, password string) error {
-	usr, err := u.UserRepository.FindByID(db, userid)
+func (u *UserService) AdminResetPassword(db *gorm.DB, username string, password string) error {
+	usr, err := u.UserRepository.FindByUsername(db, username)
 	if err != nil {
 		return err
 	}

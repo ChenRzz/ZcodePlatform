@@ -6,7 +6,7 @@ type Userinfo struct {
 }
 
 type IToken[T any] interface {
-	GenerateToken(rawInfo Userinfo) (token T, err error)
-	CheckToken(token T) bool
+	GenerateToken(rawInfo *Userinfo) (token T, err error)
+	CheckParseToken(token T) (*Userinfo, error)
 	ExpireToken(token T) error
 }

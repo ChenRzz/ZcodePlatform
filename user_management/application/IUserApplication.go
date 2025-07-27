@@ -12,7 +12,7 @@ type IUserApplication interface {
 	Login(username, password string) (uint, error)
 	LogOff(userid uint, password string) error
 	ChangeUserPassword(userid uint, oldPassword, newPassword string) error
-	AdminRestPassword(userid uint, newPassword string) error
+	AdminRestPassword(username string, newPassword string) error
 	GetUserInfo(userid uint) (username, email string, err error)
 }
 
@@ -21,7 +21,6 @@ type UserApplication struct {
 }
 
 func NewUserApplication(userService service.IUserService) *UserApplication {
-
 	return &UserApplication{userService}
 }
 
@@ -65,15 +64,16 @@ func (u *UserApplication) ChangeUserPassword(userid uint, oldPassword, newPasswo
 		return nil
 	})
 }
-func (u *UserApplication) AdminRestPassword(userid uint, newPassword string) error {
+func (u *UserApplication) AdminRestPassword(username string, newPassword string) error {
 	db := infrastructure.GetDB()
 	return db.Transaction(func(tx *gorm.DB) error {
-		err := u.UserService.AdminResetPassword(tx, userid, newPassword)
+		err := u.UserService.AdminResetPassword(tx, username, newPassword)
 		if err != nil {
 			return err
 		}
 		return nil
 	})
+
 }
 func (u *UserApplication) GetUserInfo(userid uint) (username, email string, err error) {
 	db := infrastructure.GetDB()

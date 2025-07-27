@@ -2,6 +2,7 @@ package jwt
 
 import (
 	"MScProject/auth_management/token/base_Interface"
+	"MScProject/infrastructure"
 	"context"
 	"fmt"
 	"github.com/go-redis/redis/v8"
@@ -23,8 +24,10 @@ type JwtManagement struct {
 	ctx         context.Context
 }
 
-func NewJwtManagement(redisclient *redis.Client) *JwtManagement {
-	return &JwtManagement{redisClient: redisclient}
+var _ base_Interface.IToken[string] = (*JwtManagement)(nil)
+
+func NewJwtManagement() *JwtManagement {
+	return &JwtManagement{infrastructure.RedisClient, context.Background()}
 }
 
 func (j *JwtManagement) GenerateToken(userinfo *base_Interface.Userinfo) (tokenString string, err error) {
@@ -46,16 +49,17 @@ func (j *JwtManagement) GenerateToken(userinfo *base_Interface.Userinfo) (tokenS
 	return tokenString, err
 }
 
-func (j *JwtManagement) CheckToken(token string) bool {
+func (j *JwtManagement) CheckParseToken(token string) (*base_Interface.Userinfo, error) {
 	blacklistKey := "jwt_blacklist:" + token
 	exists, err := j.redisClient.Exists(j.ctx, blacklistKey).Result()
 	if err != nil {
 		fmt.Println("Redis Error: %v\n", err)
 	}
 	if exists > 0 {
-		return false
+		return nil, err
 	}
-	tokenx, err := jwt.ParseWithClaims(token, &JwtClaims{}, func(token *jwt.Token) (interface{}, error) {
+	claims := &JwtClaims{}
+	tokenx, err := jwt.ParseWithClaims(token, claims, func(token *jwt.Token) (interface{}, error) {
 		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
 			return nil, fmt.Errorf("unexpected signing method: %v", token.Header["alg"])
 		}
@@ -64,10 +68,13 @@ func (j *JwtManagement) CheckToken(token string) bool {
 
 	if err != nil || !tokenx.Valid {
 		fmt.Printf("Token invalid: %v\n", err)
-		return false
+		return nil, err
 	}
-
-	return true
+	userinfo := &base_Interface.Userinfo{
+		UserIDInfo:   claims.UserID,
+		UsernameInfo: claims.Username,
+	}
+	return userinfo, nil
 }
 
 func (j *JwtManagement) ExpireToken(token string) error {
