@@ -1,19 +1,18 @@
-package router
+package routers
 
 import (
-	"MScProject/config"
-	"MScProject/user_management/webInterface/handlers"
-	"MScProject/user_management/webInterface/middleware"
+	"MScProject/configs"
+	"MScProject/user_management/webInterface/handllers"
 )
 
-func UserRouter(userHandler handlers.IUserHandler) {
-	userGroup := r.Group("/user")
+func UserRouter(userHandler handllers.IUserHandler) {
+	userGroup := R.Group("/user")
 	{
 		userGroup.POST("/register", userHandler.Register)
 		userGroup.POST("/login", userHandler.Login)
 	}
-	authUserGroup := r.Group("/auth_user")
-	authUserGroup.Use(config.AuthMiddleWares.CheckToken())
+	authUserGroup := R.Group("/auth_user")
+	authUserGroup.Use(configs.AuthMiddleWares.CheckToken())
 	{
 		authUserGroup.POST("/logout", userHandler.Logout)
 		authUserGroup.POST("/logoff", userHandler.LogOff)

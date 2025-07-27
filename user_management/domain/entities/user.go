@@ -1,11 +1,7 @@
-package entity
-
-import (
-	"MScProject/base"
-)
+package entities
 
 type User struct {
-	base.BaseEntity
+	BaseEntity
 	Username string `gorm:"size:100;unique"`
 	Password string `gorm:"size:255"`
 	Email    string `gorm:"size:100;unique"`

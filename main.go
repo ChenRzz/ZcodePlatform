@@ -1,9 +1,12 @@
 package main
 
 import (
-	"MScProject/infrastructure"
+	"MScProject/configs"
+	"MScProject/user_management/webInterface/routers"
 )
 
 func main() {
-	infrastructure.InitSchema(infrastructure.GetDB())
+	configs.InitALl()
+	routers.SetUpRouter(configs.UserHandlers)
+	routers.R.Run("localhost:8080")
 }

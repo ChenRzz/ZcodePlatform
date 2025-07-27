@@ -1,7 +1,7 @@
 package service
 
 import (
-	"MScProject/user_management/domain/entity"
+	"MScProject/user_management/domain/entities"
 	"MScProject/user_management/domain/repository"
 	"errors"
 	"golang.org/x/crypto/bcrypt"
@@ -45,7 +45,7 @@ func (u *UserService) Register(db *gorm.DB, username, password, email string) er
 	if err != nil {
 		return err
 	}
-	var newUser = entity.User{Username: username, Password: string(hashPassword), Email: email}
+	var newUser = entities.User{Username: username, Password: string(hashPassword), Email: email}
 	if err := u.UserRepository.CreateUser(db, &newUser); err != nil {
 		return err
 	}

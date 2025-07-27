@@ -1,15 +1,14 @@
-package base
+package entities
 
-import "time"
+import (
+	"time"
+)
 
 type Class struct {
 	BaseEntity
 	ClassName        string `gorm:"size:255;unique"`
 	ClassDescription string
 	ClassManagerID   uint
-
-	Lectures []Lecture
-	Users    []User `gorm:"many2many:class_students"`
 }
 
 type Lecture struct {
@@ -20,9 +19,6 @@ type Lecture struct {
 	StartTime          time.Time
 	EndTime            time.Time
 	LecturerID         uint
-
-	Class    Class
-	Lecturer User
 }
 
 type ClassStudent struct {

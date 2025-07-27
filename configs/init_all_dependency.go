@@ -1,32 +1,32 @@
-package config
+package configs
 
 import (
 	"MScProject/auth_management/token/base_Interface"
 	"MScProject/auth_management/token/jwt"
-	"MScProject/infrastructure"
 	"MScProject/user_management/application"
 	"MScProject/user_management/domain/repository"
 	"MScProject/user_management/domain/service"
-	"MScProject/user_management/webInterface/handlers"
+	infrastructure2 "MScProject/user_management/infrastructure"
+	"MScProject/user_management/webInterface/handllers"
 	"MScProject/user_management/webInterface/middleware"
 )
 
 var (
 	UserServices     service.IUserService
 	UserApplications application.IUserApplication
-	UserHandlers     handlers.IUserHandler
+	UserHandlers     handllers.IUserHandler
 	Authtokens       base_Interface.IToken[string]
 	UserRepos        repository.IUserRepository
 	AuthMiddleWares  *middleware.AuthMiddleWare
 )
 
 func InitALl() {
-	infrastructure.InitRedis()
-	infrastructure.InitDB()
+	infrastructure2.InitRedis()
+	infrastructure2.InitDB()
 	Authtokens = jwt.NewJwtManagement()
 	UserRepos = repository.NewUserRepoMsql()
 	UserServices = service.NewUserService(UserRepos)
 	UserApplications = application.NewUserApplication(UserServices)
-	UserHandlers = handlers.NewUserHandler(UserApplications, Authtokens)
+	UserHandlers = handllers.NewUserHandler(UserApplications, Authtokens)
 	AuthMiddleWares = middleware.NewAuthMiddleWare(Authtokens)
 }

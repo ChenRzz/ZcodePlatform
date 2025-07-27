@@ -1,4 +1,4 @@
-package handlers
+package handllers
 
 import (
 	"MScProject/auth_management/token/base_Interface"

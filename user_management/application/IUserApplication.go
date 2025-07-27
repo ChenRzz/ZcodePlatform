@@ -1,8 +1,8 @@
 package application
 
 import (
-	"MScProject/infrastructure"
 	"MScProject/user_management/domain/service"
+	"MScProject/user_management/infrastructure"
 	"errors"
 	"gorm.io/gorm"
 )
