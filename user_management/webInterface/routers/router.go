@@ -8,5 +8,6 @@ import (
 var R *gin.Engine
 
 func SetUpRouter(userhandler handllers.IUserHandler) {
+	R = gin.Default()
 	UserRouter(userhandler)
 }

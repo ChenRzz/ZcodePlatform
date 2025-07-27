@@ -18,7 +18,7 @@ var (
 )
 
 func InitDB() {
-	dsn := "msc_user:msc123@tcp(127.0.0.1:3306)/MscProject?charset=utf8mb4&parseTime=True&loc=Local"
+	dsn := "root:msc432@tcp(127.0.0.1:3306)/MscProject?charset=utf8mb4&parseTime=True&loc=Local"
 	var err error
 	db, err = gorm.Open(mysql.Open(dsn), &gorm.Config{})
 	if err != nil {
@@ -28,6 +28,10 @@ func InitDB() {
 }
 
 func InitSchema(db *gorm.DB) {
+	if db.Migrator().HasTable("users") {
+		fmt.Println("数据库已初始化，跳过建表")
+		return
+	}
 	content, err := os.ReadFile("sql/schema.sql")
 	if err != nil {
 		log.Fatalf("Failed to load schema.sql: %v", err)
@@ -48,4 +52,8 @@ func InitSchema(db *gorm.DB) {
 func GetDB() *gorm.DB {
 	onceInitDB.Do(InitDB)
 	return db.Session(&gorm.Session{Context: &gin.Context{}})
+}
+func SetupDatabase() {
+	GetDB()
+	InitSchema(db)
 }

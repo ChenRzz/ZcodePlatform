@@ -22,7 +22,7 @@ var (
 
 func InitALl() {
 	infrastructure2.InitRedis()
-	infrastructure2.InitDB()
+	infrastructure2.SetupDatabase()
 	Authtokens = jwt.NewJwtManagement()
 	UserRepos = repository.NewUserRepoMsql()
 	UserServices = service.NewUserService(UserRepos)
