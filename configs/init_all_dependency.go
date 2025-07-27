@@ -14,7 +14,7 @@ import (
 var (
 	UserServices     service.IUserService
 	UserApplications application.IUserApplication
-	UserHandlers     handllers.IUserHandler
+	UserHandlers     *handllers.UserHandler
 	Authtokens       base_Interface.IToken[string]
 	UserRepos        repository.IUserRepository
 	AuthMiddleWares  *middleware.AuthMiddleWare

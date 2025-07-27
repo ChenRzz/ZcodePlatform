@@ -10,7 +10,7 @@ import (
 	"time"
 )
 
-var secretKey = "hsaihdnwjsahiu712iwj12w"
+var secretKey = []byte("hsaihdnwjsahiu712iwj12w")
 
 type JwtClaims struct {
 	UserID   uint
@@ -54,9 +54,11 @@ func (j *JwtManagement) CheckParseToken(token string) (*base_Interface.Userinfo,
 	exists, err := j.redisClient.Exists(j.ctx, blacklistKey).Result()
 	if err != nil {
 		fmt.Println("Redis Error: %v\n", err)
+		return nil, fmt.Errorf("token is blacklisted")
+
 	}
 	if exists > 0 {
-		return nil, err
+		return nil, fmt.Errorf("token is blacklisted")
 	}
 	claims := &JwtClaims{}
 	tokenx, err := jwt.ParseWithClaims(token, claims, func(token *jwt.Token) (interface{}, error) {
@@ -66,9 +68,11 @@ func (j *JwtManagement) CheckParseToken(token string) (*base_Interface.Userinfo,
 		return []byte(secretKey), nil
 	})
 
-	if err != nil || !tokenx.Valid {
-		fmt.Printf("Token invalid: %v\n", err)
-		return nil, err
+	if err != nil {
+		return nil, fmt.Errorf("token parse failed: %w", err)
+	}
+	if !tokenx.Valid {
+		return nil, fmt.Errorf("token is invalid")
 	}
 	userinfo := &base_Interface.Userinfo{
 		UserIDInfo:   claims.UserID,

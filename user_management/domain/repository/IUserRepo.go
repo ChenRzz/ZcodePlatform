@@ -4,7 +4,6 @@ import (
 	"MScProject/user_management/domain/entities"
 	"errors"
 	"gorm.io/gorm"
-	"time"
 )
 
 type IUserRepository interface {
@@ -62,14 +61,9 @@ func (u *UserRepoMsql) UpdateUser(db *gorm.DB, user *entities.User) error {
 	return nil
 }
 func (u *UserRepoMsql) DeleteUser(db *gorm.DB, UserID uint) error {
-	var usr entities.User
-	err := db.Model(usr).Updates(
-		map[string]interface{}{
-			"is_deleted": gorm.Expr("id"),
-			"deleted_at": time.Now(),
-		}).Error
+	err := db.Delete(&entities.User{}, UserID).Error
 	if err != nil {
-		return errors.New("Failed to update user")
+		return errors.New("failed to delete user")
 	}
 	return nil
 }

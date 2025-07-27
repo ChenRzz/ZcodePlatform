@@ -51,11 +51,13 @@ func (h *UserHandler) Login(c *gin.Context) {
 	uid, err := h.UserApplication.Login(req.Username, req.Password)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err})
+		return
 	}
 
 	tk, err := h.AuthToken.GenerateToken(&base_Interface.Userinfo{uid, req.Username})
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
 	}
 	c.JSON(http.StatusOK, gin.H{
 		"token":   tk,
@@ -94,6 +96,7 @@ func (h *UserHandler) LogOff(c *gin.Context) {
 	err := h.UserApplication.LogOff(uiduint, req.Password)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
 	}
 	authHeader := c.GetHeader("Authorization")
 	if authHeader == "" || !strings.HasPrefix(authHeader, "Bearer ") {

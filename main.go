@@ -8,5 +8,5 @@ import (
 func main() {
 	configs.InitALl()
 	routers.SetUpRouter(configs.UserHandlers)
-	routers.R.Run("localhost:8080")
+	routers.R.Run(":8081")
 }

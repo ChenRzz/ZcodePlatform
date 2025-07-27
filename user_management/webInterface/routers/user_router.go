@@ -5,7 +5,7 @@ import (
 	"MScProject/user_management/webInterface/handllers"
 )
 
-func UserRouter(userHandler handllers.IUserHandler) {
+func UserRouter(userHandler *handllers.UserHandler) {
 	userGroup := R.Group("/user")
 	{
 		userGroup.POST("/register", userHandler.Register)

@@ -30,6 +30,11 @@ func (a *AuthMiddleWare) CheckToken() gin.HandlerFunc {
 			c.Abort()
 			return
 		}
+		if userinfo == nil {
+			c.JSON(http.StatusUnauthorized, gin.H{"error": "Invalid token payload"})
+			c.Abort()
+			return
+		}
 		c.Set("user_id", userinfo.UserIDInfo)
 		c.Set("username", userinfo.UsernameInfo)
 		c.Next()

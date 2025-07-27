@@ -7,7 +7,7 @@ import (
 
 var R *gin.Engine
 
-func SetUpRouter(userhandler handllers.IUserHandler) {
+func SetUpRouter(userhandler *handllers.UserHandler) {
 	R = gin.Default()
 	UserRouter(userhandler)
 }

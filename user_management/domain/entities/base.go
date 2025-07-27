@@ -4,7 +4,7 @@ import "time"
 
 type BaseEntity struct {
 	ID        uint `gorm:"primaryKey"`
-	CreatedAt time.Time
+	CreatedAt *time.Time
 	IsDelete  bool
-	DeletedAt time.Time
+	DeletedAt *time.Time
 }
