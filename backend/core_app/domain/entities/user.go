@@ -5,4 +5,5 @@ type User struct {
 	Username string `gorm:"size:100;unique"`
 	Password string `gorm:"size:255"`
 	Email    string `gorm:"size:100;unique"`
+	ZCodeID  uint64 `gorm:"unique"`
 }

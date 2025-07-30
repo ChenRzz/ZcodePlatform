@@ -2,7 +2,7 @@ package handllers
 
 import (
 	"MScProject/auth_management/token/base_Interface"
-	"MScProject/user_management/application"
+	"MScProject/core_app/application"
 	"github.com/gin-gonic/gin"
 	"net/http"
 	"strings"

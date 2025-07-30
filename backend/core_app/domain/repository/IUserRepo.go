@@ -1,7 +1,7 @@
 package repository
 
 import (
-	"MScProject/user_management/domain/entities"
+	"MScProject/core_app/domain/entities"
 	"errors"
 	"gorm.io/gorm"
 )

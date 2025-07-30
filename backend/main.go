@@ -2,7 +2,7 @@ package main
 
 import (
 	"MScProject/configs"
-	"MScProject/user_management/webInterface/routers"
+	"MScProject/core_app/webInterface/routers"
 )
 
 func main() {

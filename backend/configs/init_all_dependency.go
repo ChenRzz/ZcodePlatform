@@ -3,12 +3,12 @@ package configs
 import (
 	"MScProject/auth_management/token/base_Interface"
 	"MScProject/auth_management/token/jwt"
-	"MScProject/user_management/application"
-	"MScProject/user_management/domain/repository"
-	"MScProject/user_management/domain/service"
-	infrastructure2 "MScProject/user_management/infrastructure"
-	"MScProject/user_management/webInterface/handllers"
-	"MScProject/user_management/webInterface/middleware"
+	"MScProject/core_app/application"
+	"MScProject/core_app/domain/repository"
+	"MScProject/core_app/domain/service"
+	infrastructure2 "MScProject/core_app/infrastructure"
+	"MScProject/core_app/webInterface/handllers"
+	"MScProject/core_app/webInterface/middleware"
 )
 
 var (

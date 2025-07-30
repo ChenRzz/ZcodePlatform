@@ -2,7 +2,7 @@ package jwt
 
 import (
 	"MScProject/auth_management/token/base_Interface"
-	"MScProject/user_management/infrastructure"
+	"MScProject/core_app/infrastructure"
 	"context"
 	"fmt"
 	"github.com/go-redis/redis/v8"

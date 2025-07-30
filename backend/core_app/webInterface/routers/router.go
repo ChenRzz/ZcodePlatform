@@ -1,7 +1,7 @@
 package routers
 
 import (
-	"MScProject/user_management/webInterface/handllers"
+	"MScProject/core_app/webInterface/handllers"
 	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
 	"time"

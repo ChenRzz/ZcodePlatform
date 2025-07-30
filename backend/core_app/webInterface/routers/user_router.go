@@ -2,7 +2,7 @@ package routers
 
 import (
 	"MScProject/configs"
-	"MScProject/user_management/webInterface/handllers"
+	"MScProject/core_app/webInterface/handllers"
 )
 
 func UserRouter(userHandler *handllers.UserHandler) {
