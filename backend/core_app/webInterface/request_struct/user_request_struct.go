@@ -1,4 +1,4 @@
-package handllers
+package request_struct
 
 type RegisterRequest struct {
 	Username string `json:"username" binding:"required"`

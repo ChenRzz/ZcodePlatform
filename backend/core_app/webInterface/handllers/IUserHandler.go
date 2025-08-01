@@ -3,6 +3,7 @@ package handllers
 import (
 	"MScProject/auth_management/token/base_Interface"
 	"MScProject/core_app/application"
+	"MScProject/core_app/webInterface/request_struct"
 	"github.com/gin-gonic/gin"
 	"net/http"
 	"strings"
@@ -28,7 +29,7 @@ func NewUserHandler(userapplication application.IUserApplication, authtoken base
 }
 
 func (h *UserHandler) Register(c *gin.Context) {
-	var req RegisterRequest
+	var req request_struct.RegisterRequest
 	if err := c.ShouldBind(&req); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
@@ -43,7 +44,7 @@ func (h *UserHandler) Register(c *gin.Context) {
 }
 
 func (h *UserHandler) Login(c *gin.Context) {
-	var req LoginRequest
+	var req request_struct.LoginRequest
 	if err := c.ShouldBind(&req); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
@@ -82,7 +83,7 @@ func (h *UserHandler) Logout(c *gin.Context) {
 	return
 }
 func (h *UserHandler) LogOff(c *gin.Context) {
-	var req LogoffRequest
+	var req request_struct.LogoffRequest
 	if err := c.ShouldBind(&req); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
@@ -114,7 +115,7 @@ func (h *UserHandler) LogOff(c *gin.Context) {
 	})
 }
 func (h *UserHandler) ChangeUserPassword(c *gin.Context) {
-	var req ChangeUserPasswordRequest
+	var req request_struct.ChangeUserPasswordRequest
 	if err := c.ShouldBind(&req); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
@@ -134,7 +135,7 @@ func (h *UserHandler) ChangeUserPassword(c *gin.Context) {
 	})
 }
 func (h *UserHandler) AdminRestPassword(c *gin.Context) {
-	var req AdminResetPasswordRequest
+	var req request_struct.AdminResetPasswordRequest
 	if err := c.ShouldBind(&req); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return

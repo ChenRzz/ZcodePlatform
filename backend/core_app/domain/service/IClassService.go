@@ -3,6 +3,7 @@ package service
 import (
 	"MScProject/core_app/domain/entities"
 	"MScProject/core_app/domain/repository"
+	"errors"
 	"gorm.io/gorm"
 	"time"
 )
@@ -38,8 +39,12 @@ func NewClassService(ClassRepo repository.IClassRepo) *ClassService {
 }
 
 func (c *ClassService) CreateClass(db *gorm.DB, className string, classCode string, classDescription string, classManagerZCodeID uint64) error {
+	class, err := c.ClassRepo.FindClassByClassCode(db, classCode)
+	if class == nil {
+		return errors.New("Class has already exists, please use another classCode.")
+	}
 	var newClass = entities.Class{ClassName: className, ClassCode: classCode, ClassDescription: classDescription, ClassManagerZCodeID: classManagerZCodeID}
-	err := c.ClassRepo.CreateClass(db, &newClass)
+	err = c.ClassRepo.CreateClass(db, &newClass)
 	if err != nil {
 		return err
 	}
