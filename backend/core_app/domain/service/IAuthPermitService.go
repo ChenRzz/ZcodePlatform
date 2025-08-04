@@ -1,9 +1,9 @@
 package service
 
 import (
-	"MScProject/auth_management/rbac/domain/dto"
-	"MScProject/auth_management/rbac/domain/entities"
-	"MScProject/auth_management/rbac/domain/repository"
+	"MScProject/core_app/domain/entities"
+	"MScProject/core_app/domain/repository"
+	"MScProject/core_app/dto"
 	"gorm.io/gorm"
 )
 

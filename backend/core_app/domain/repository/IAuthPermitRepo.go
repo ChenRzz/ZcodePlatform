@@ -1,8 +1,8 @@
 package repository
 
 import (
-	"MScProject/auth_management/rbac/domain/dto"
-	"MScProject/auth_management/rbac/domain/entities"
+	"MScProject/core_app/domain/entities"
+	"MScProject/core_app/dto"
 	"gorm.io/gorm"
 )
 
