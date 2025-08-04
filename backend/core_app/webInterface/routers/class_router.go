@@ -1,10 +1,5 @@
 package routers
 
-import (
-	"MScProject/configs"
-	"MScProject/core_app/webInterface/handllers"
-)
-
 //CreateClass(c *gin.Context)
 //	DeleteClass(c *gin.Context)
 //	UpdateClassInfo(c *gin.Context)
@@ -22,20 +17,20 @@ import (
 //	SetRoleForParticipant(c *gin.Context)
 //	FindClassesByParticipantZCodeID(c *gin.Context)
 //	FindParticipantsByClassID(c *gin.Context)
-func ClassRouter(classHandler *handllers.ClassHandler) {
-	classGroup := R.Group("/class")
-	
-	{
-		classGroup.POST("/create", classHandler.CreateClass)
-		classGroup.POST("/delete", classHandler.DeleteClass)
-	}
-	authUserGroup := R.Group("/auth_user")
-	authUserGroup.Use(configs.AuthMiddleWares.CheckToken())
-	{
-		authUserGroup.POST("/logout", userHandler.Logout)
-		authUserGroup.POST("/logoff", userHandler.LogOff)
-		authUserGroup.POST("/change_password", userHandler.ChangeUserPassword)
-		authUserGroup.POST("/admin_reset_password", userHandler.AdminRestPassword)
-		authUserGroup.GET("/userinfo", userHandler.GetUserInfo)
-	}
-}
+//func ClassRouter(classHandler *handllers.ClassHandler) {
+//	classGroup := R.Group("/class")
+//
+//	{
+//		classGroup.POST("/create", classHandler.CreateClass)
+//		classGroup.POST("/delete", classHandler.DeleteClass)
+//	}
+//	authUserGroup := R.Group("/auth_user")
+//	authUserGroup.Use(configs.AuthMiddleWares.CheckToken())
+//	{
+//		authUserGroup.POST("/logout", userHandler.Logout)
+//		authUserGroup.POST("/logoff", userHandler.LogOff)
+//		authUserGroup.POST("/change_password", userHandler.ChangeUserPassword)
+//		authUserGroup.POST("/admin_reset_password", userHandler.AdminRestPassword)
+//		authUserGroup.GET("/userinfo", userHandler.GetUserInfo)
+//	}
+//}
