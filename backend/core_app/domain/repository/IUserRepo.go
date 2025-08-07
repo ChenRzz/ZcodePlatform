@@ -9,6 +9,7 @@ import (
 type IUserRepository interface {
 	FindByUsername(db *gorm.DB, username string) (*entities.User, error)
 	FindByID(db *gorm.DB, UserID uint) (*entities.User, error)
+	FindByZCode(db *gorm.DB, UserZCode uint64) (*entities.User, error)
 	FindByEmail(db *gorm.DB, UserEmail string) (*entities.User, error)
 	CreateUser(db *gorm.DB, user *entities.User) error
 	UpdateUser(db *gorm.DB, user *entities.User) error
@@ -29,6 +30,16 @@ func (u *UserRepoMsql) FindByUsername(db *gorm.DB, username string) (*entities.U
 		return nil, errors.New("user not found")
 	}
 	return &usr, nil
+}
+func (u *UserRepoMsql) FindByZCode(db *gorm.DB, UserZcode uint64) (*entities.User, error) {
+
+	var usr entities.User
+	err := db.Where("ZCodeID=?", UserZcode).First(&usr).Error
+	if err != nil {
+		return nil, errors.New("user not found")
+	}
+	return &usr, nil
+
 }
 func (u *UserRepoMsql) FindByID(db *gorm.DB, userID uint) (*entities.User, error) {
 	var usr entities.User

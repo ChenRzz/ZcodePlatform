@@ -3,8 +3,10 @@ import { useNavigate } from "react-router-dom";
 import {getUserInfo, changePassword, logoffUser, logoutUser} from "../../services/user";
 
 interface UserInfo {
-    username: string;
-    email: string;
+    user_id: bigint;
+    user_name: string;
+    user_email: string;
+    user_z_code: bigint;
 }
 
 function UserInfo() {
@@ -67,13 +69,17 @@ function UserInfo() {
         <div className="container">
             <h2>User Information</h2>
             <div className="mb-3">
-                <strong>Username:</strong> {userInfo.username}
+                <strong>Username:</strong> {userInfo.user_name}
             </div>
             <div className="mb-3">
-                <strong>Email:</strong> {userInfo.email}
+                <strong>Email:</strong> {userInfo.user_email}
             </div>
             <div className="mb-3">
-                <button onClick={handleChangePassword} className="btn btn-outline-primary btn-sm">Change Password</button>
+                <strong>ZCode:</strong> {userInfo.user_z_code}
+            </div>
+            <div className="mb-3">
+                <button onClick={handleChangePassword} className="btn btn-outline-primary btn-sm">Change Password
+                </button>
             </div>
             <div className="mb-3">
                 <button onClick={handleLogoff} className="btn btn-outline-danger btn-sm">Log Off</button>

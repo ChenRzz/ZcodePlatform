@@ -3,6 +3,7 @@ package service
 import (
 	"MScProject/core_app/domain/entities"
 	"MScProject/core_app/domain/repository"
+	"MScProject/core_app/dto/response"
 	"errors"
 	"gorm.io/gorm"
 	"time"
@@ -14,6 +15,7 @@ type IClassService interface {
 	UpdateClassInfo(db *gorm.DB, classID uint, className string, classCode string, classDescription string, classManagerZCodeID uint64) error
 	FindClassByID(db *gorm.DB, classID uint) (*entities.Class, error)
 	FindClassByClassCode(db *gorm.DB, classCode string) (*entities.Class, error)
+	FindAllClasses(db *gorm.DB) ([]*entities.Class, error)
 
 	CreateLecture(db *gorm.DB, ClassID uint, LectureName string, LectureDescription string,
 		StartTime *time.Time, EndTime *time.Time, LecturerZCodeID uint64) error
@@ -28,6 +30,7 @@ type IClassService interface {
 	SetRoleForParticipant(db *gorm.DB, classParticipantsID uint, Role string) error
 	FindClassesByParticipantZCodeID(db *gorm.DB, UserZCodeID uint64) ([]*entities.ClassParticipants, error)
 	FindParticipantsByClassID(db *gorm.DB, ClassID uint) ([]*entities.ClassParticipants, error)
+	FindUserClasses(db *gorm.DB, participantZCodeID uint64) ([]*response.UserJoinedClassesInfo, error)
 }
 
 type ClassService struct {
@@ -177,4 +180,12 @@ func (c *ClassService) FindParticipantsByClassID(db *gorm.DB, ClassID uint) ([]*
 		return nil, err
 	}
 	return participants, nil
+}
+
+func (c *ClassService) FindAllClasses(db *gorm.DB) ([]*entities.Class, error) {
+	return c.ClassRepo.FindAllClasses(db)
+}
+
+func (c *ClassService) FindUserClasses(db *gorm.DB, participantZCodeID uint64) ([]*response.UserJoinedClassesInfo, error) {
+	return c.ClassRepo.FindUserClasses(db, participantZCodeID)
 }

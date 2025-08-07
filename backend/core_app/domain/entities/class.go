@@ -26,9 +26,9 @@ type Lecture struct {
 
 type ClassParticipants struct {
 	BaseEntity
-	ClassID     uint   `gorm:"primaryKey" json:"class_id"`
+	ClassID     uint   `json:"class_id"`
 	ClassName   string `json:"class_name"`
-	UserZCodeID uint64 `gorm:"primaryKey" json:"user_zcode_id"`
+	UserZCodeID uint64 `json:"user_zcode_id"`
 	Username    string `json:"username"`
-	UserRole    string `gorm:"primaryKey" json:"user_role"`
+	UserRole    string `json:"user_role"`
 }

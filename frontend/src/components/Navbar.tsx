@@ -19,10 +19,9 @@ function Navbar() {
         } catch (err) {
             console.warn("Logout failed:", err);
         } finally {
-            // 清除 token 和 username，更新状态
             localStorage.removeItem("token");
             setUsername(null);
-            navigate("/login"); // 重定向到登录页面
+            navigate("/login");
         }
     };
 
@@ -34,10 +33,19 @@ function Navbar() {
                         Zcode Platform
                     </Link>
                 </div>
+                <div className="d-flex align-items-center gap-4">
+                    <Link
+                        to="/myclasses"
+                        className="text-success text-decoration-none fs-5 fw-semibold"
+                    >
+                        📘 My Classes
+                    </Link>
+
+                   </div>
                 <nav className="d-flex gap-3 align-items-center">
                     {checkLoginStatus() ? (
                         <>
-                        <Link to="/userinfo" className="text-muted">
+                            <Link to="/userinfo" className="text-muted">
                                 👤 {username}
                             </Link>
                             <button onClick={handleLogout} className="btn btn-outline-danger btn-sm">

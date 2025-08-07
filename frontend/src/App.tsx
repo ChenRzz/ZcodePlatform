@@ -1,4 +1,4 @@
-import AppRouter from "./router"; // 你自己写的 router/index.tsx
+import AppRouter from "./router";
 import Navbar from "./components/Navbar";
 import {BrowserRouter} from "react-router-dom";
 import "./index.css";

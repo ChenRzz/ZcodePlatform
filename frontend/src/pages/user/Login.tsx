@@ -4,19 +4,21 @@ import { useNavigate } from 'react-router-dom';
 import { useUser } from '../../context/UserContext';
 const Login = () => {
     const navigate = useNavigate();
-    const { setUsername } = useUser();
-    const [username, setUsernameInput] = useState('');
+    const {setUsername } = useUser();
+    const [usernameinput, setUsernameInput] = useState('');
     const [password, setPassword] = useState('');
     const [message, setMessage] = useState('');
 
     const handleLogin = async () => {
         try {
-            const response = await loginUser(username, password);
+            const response = await loginUser(usernameinput, password);
             const token = response.token;
+            const backendUsername = response.username;
 
             // 存储 Token 到本地（也可以根据需要使用 cookie）
             localStorage.setItem('token', token);
-            setUsername(username)
+            localStorage.setItem('username', backendUsername);
+            setUsername(backendUsername)
             setMessage('🎉 Login successful!');
             setTimeout(() => navigate('/'), 1500); // 登录成功后跳转首页
         } catch (error: any) {
@@ -36,7 +38,7 @@ const Login = () => {
                         type="text"
                         className="form-control"
                         placeholder="Username"
-                        value={username}
+                        value={usernameinput}
                         onChange={(e) => setUsernameInput(e.target.value)}
                     />
                 </div>

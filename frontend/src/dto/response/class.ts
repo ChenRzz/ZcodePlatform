@@ -1,0 +1,41 @@
+// src/dto/class.ts
+
+export interface ClassInfo {
+    class_id: number;
+    created_at: string | null; // 时间一般以字符串形式传输，可能为 null
+    class_name: string;
+    class_code: string;
+    class_description: string;
+    class_manager_zcode_id: bigint;
+    class_manager_name: string;
+}
+
+export interface LectureInfo {
+    lecture_id: number;
+    created_at: string | null;
+    lecture_name: string;
+    lecture_description: string;
+    class_id: number;
+    start_time: string | null;
+    end_time: string | null;
+    lecturer_zcode_id: bigint;
+    lecturer_name: string;
+}
+
+export interface ClassParticipantInfo {
+    class_participant_id: number;
+    class_id: number;
+    class_name: string;
+    user_zcode_id: bigint;
+    username: string;
+    user_role: string;
+}
+
+export interface UserJoinedClassesInfo {
+    class_participant_id:number;
+    class_id:number;
+    class_name:string;
+    class_code:string;
+    class_manager_name:string;
+    created_at:string;
+}

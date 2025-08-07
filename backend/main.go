@@ -7,6 +7,6 @@ import (
 
 func main() {
 	configs.InitALl()
-	routers.SetUpRouter(configs.UserHandlers)
+	routers.SetUpRouter(configs.UserHandlers, configs.ClassHandlers, configs.AuthPermitHandlers)
 	routers.R.Run(":8081")
 }

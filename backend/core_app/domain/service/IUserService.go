@@ -3,6 +3,7 @@ package service
 import (
 	"MScProject/core_app/domain/entities"
 	"MScProject/core_app/domain/repository"
+	"MScProject/core_app/dto/request"
 	"MScProject/public_tools"
 	"errors"
 	"golang.org/x/crypto/bcrypt"
@@ -13,10 +14,11 @@ import (
 type IUserService interface {
 	Register(db *gorm.DB, username, password, email string) error
 	LogOff(db *gorm.DB, userid uint, password string) error
-	Login(db *gorm.DB, username, password string) (bool, error, uint)
+	Login(db *gorm.DB, username, password string) (bool, error, uint, uint64)
 	ChangeUserPassword(db *gorm.DB, userid uint, oldPassword, newPassword string) error
-	GetUserInfo(db *gorm.DB, userid uint) (username, email string, err error)
+	GetUserInfo(db *gorm.DB, userid uint) (*request.UserinfoDTO, error)
 	AdminResetPassword(db *gorm.DB, username string, password string) error
+	FindByUserZCode(db *gorm.DB, userZcode uint64) (*entities.User, error)
 }
 
 type UserService struct {
@@ -57,16 +59,16 @@ func (u *UserService) Register(db *gorm.DB, username, password, email string) er
 	return nil
 }
 
-func (u *UserService) Login(db *gorm.DB, username, password string) (bool, error, uint) {
+func (u *UserService) Login(db *gorm.DB, username, password string) (bool, error, uint, uint64) {
 	usr, err := u.UserRepository.FindByUsername(db, username)
 	if err != nil {
-		return false, err, 0
+		return false, err, 0, 0
 	}
 	err = bcrypt.CompareHashAndPassword([]byte(usr.Password), []byte(password))
 	if err != nil {
-		return false, errors.New("Password is incorrect"), 0
+		return false, errors.New("Password is incorrect"), 0, 0
 	}
-	return true, nil, usr.ID
+	return true, nil, usr.ID, usr.ZCodeID
 }
 
 func (u *UserService) ChangeUserPassword(db *gorm.DB, userid uint, oldPassword, newPassword string) error {
@@ -95,12 +97,17 @@ func (u *UserService) ChangeUserPassword(db *gorm.DB, userid uint, oldPassword, 
 	return nil
 }
 
-func (u *UserService) GetUserInfo(db *gorm.DB, userid uint) (username, email string, err error) {
+func (u *UserService) GetUserInfo(db *gorm.DB, userid uint) (*request.UserinfoDTO, error) {
 	usr, err := u.UserRepository.FindByID(db, userid)
 	if err != nil {
-		return "", "", err
+		return nil, err
 	}
-	return usr.Username, usr.Email, nil
+	var userinfo request.UserinfoDTO
+	userinfo.UserID = usr.ID
+	userinfo.UserEmail = usr.Email
+	userinfo.UserZCode = usr.ZCodeID
+	userinfo.UserName = usr.Username
+	return &userinfo, nil
 }
 func (u *UserService) LogOff(db *gorm.DB, userid uint, password string) error {
 	usr, err := u.UserRepository.FindByID(db, userid)
@@ -132,4 +139,9 @@ func (u *UserService) AdminResetPassword(db *gorm.DB, username string, password 
 	usr.Password = string(hashPassword)
 	err = u.UserRepository.UpdateUser(db, usr)
 	return err
+}
+
+func (u *UserService) FindByUserZCode(db *gorm.DB, userZcode uint64) (*entities.User, error) {
+	usr, err := u.UserRepository.FindByZCode(db, userZcode)
+	return usr, err
 }

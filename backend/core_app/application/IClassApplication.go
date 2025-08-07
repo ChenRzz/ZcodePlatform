@@ -3,6 +3,7 @@ package application
 import (
 	"MScProject/core_app/domain/entities"
 	"MScProject/core_app/domain/service"
+	"MScProject/core_app/dto/response"
 	"MScProject/core_app/infrastructure"
 	"gorm.io/gorm"
 	"time"
@@ -14,6 +15,7 @@ type IClassApplication interface {
 	UpdateClassInfo(classID uint, className string, classCode string, classDescription string, classManagerZCodeID uint64) error
 	FindClassByID(classID uint) (*entities.Class, error)
 	FindClassByClassCode(classCode string) (*entities.Class, error)
+	FindAllClasses() ([]*entities.Class, error)
 
 	CreateLecture(ClassID uint, LectureName string, LectureDescription string, StartTime *time.Time, EndTime *time.Time, LecturerZCodeID uint64) error
 	DeleteLecture(LectureID uint) error
@@ -26,6 +28,7 @@ type IClassApplication interface {
 	SetRoleForParticipant(classParticipantsID uint, Role string) error
 	FindClassesByParticipantZCodeID(UserZCodeID uint64) ([]*entities.ClassParticipants, error)
 	FindParticipantsByClassID(ClassID uint) ([]*entities.ClassParticipants, error)
+	FindUserClasses(participantZCodeID uint64) ([]*response.UserJoinedClassesInfo, error)
 }
 
 type ClassApplication struct {
@@ -182,4 +185,13 @@ func (c *ClassApplication) FindParticipantsByClassID(ClassID uint) ([]*entities.
 		return nil, errs
 	}
 	return classParticipants, nil
+}
+
+func (c *ClassApplication) FindAllClasses() ([]*entities.Class, error) {
+	db := infrastructure.GetDB()
+	return c.ClassService.FindAllClasses(db)
+}
+func (c *ClassApplication) FindUserClasses(participantZCodeID uint64) ([]*response.UserJoinedClassesInfo, error) {
+	db := infrastructure.GetDB()
+	return c.ClassService.FindUserClasses(db, participantZCodeID)
 }

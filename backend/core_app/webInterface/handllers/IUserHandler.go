@@ -1,9 +1,9 @@
 package handllers
 
 import (
-	"MScProject/auth_management/token/base_Interface"
+	"MScProject/authentication/token/base_Interface"
 	"MScProject/core_app/application"
-	"MScProject/core_app/webInterface/request_struct"
+	"MScProject/core_app/dto/request"
 	"github.com/gin-gonic/gin"
 	"net/http"
 	"strings"
@@ -17,6 +17,7 @@ type IUserHandler interface {
 	ChangeUserPassword(c *gin.Context)
 	AdminRestPassword(c *gin.Context)
 	GetUserInfo(c *gin.Context)
+	FindByUserZCode(c *gin.Context)
 }
 
 type UserHandler struct {
@@ -29,7 +30,7 @@ func NewUserHandler(userapplication application.IUserApplication, authtoken base
 }
 
 func (h *UserHandler) Register(c *gin.Context) {
-	var req request_struct.RegisterRequest
+	var req request.RegisterRequest
 	if err := c.ShouldBind(&req); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
@@ -44,25 +45,26 @@ func (h *UserHandler) Register(c *gin.Context) {
 }
 
 func (h *UserHandler) Login(c *gin.Context) {
-	var req request_struct.LoginRequest
+	var req request.LoginRequest
 	if err := c.ShouldBind(&req); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
-	uid, err := h.UserApplication.Login(req.Username, req.Password)
+	uid, uzcode, err := h.UserApplication.Login(req.Username, req.Password)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err})
 		return
 	}
 
-	tk, err := h.AuthToken.GenerateToken(&base_Interface.Userinfo{uid, req.Username})
+	tk, err := h.AuthToken.GenerateToken(&base_Interface.Userinfo{uid, uzcode, req.Username})
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
 	c.JSON(http.StatusOK, gin.H{
-		"token":   tk,
-		"message": "login success",
+		"token":    tk,
+		"message":  "login success",
+		"username": req.Username,
 	})
 }
 func (h *UserHandler) Logout(c *gin.Context) {
@@ -83,7 +85,7 @@ func (h *UserHandler) Logout(c *gin.Context) {
 	return
 }
 func (h *UserHandler) LogOff(c *gin.Context) {
-	var req request_struct.LogoffRequest
+	var req request.LogoffRequest
 	if err := c.ShouldBind(&req); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
@@ -115,7 +117,7 @@ func (h *UserHandler) LogOff(c *gin.Context) {
 	})
 }
 func (h *UserHandler) ChangeUserPassword(c *gin.Context) {
-	var req request_struct.ChangeUserPasswordRequest
+	var req request.ChangeUserPasswordRequest
 	if err := c.ShouldBind(&req); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
@@ -135,7 +137,7 @@ func (h *UserHandler) ChangeUserPassword(c *gin.Context) {
 	})
 }
 func (h *UserHandler) AdminRestPassword(c *gin.Context) {
-	var req request_struct.AdminResetPasswordRequest
+	var req request.AdminResetPasswordRequest
 	if err := c.ShouldBind(&req); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
@@ -156,12 +158,35 @@ func (h *UserHandler) GetUserInfo(c *gin.Context) {
 		c.JSON(http.StatusUnauthorized, gin.H{"error": "Can not find User ID"})
 		return
 	}
-	username, email, err := h.UserApplication.GetUserInfo(uiduint)
+	userinfo, err := h.UserApplication.GetUserInfo(uiduint)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 	}
 	c.JSON(http.StatusOK, gin.H{
-		"username": username,
-		"email":    email,
+		"message": "successfully find the user",
+		"data":    userinfo,
+	})
+}
+
+func (h *UserHandler) FindByUserZCode(c *gin.Context) {
+	uzcode, exist := c.Get("Zcode")
+	uzcodeuint := uzcode.(uint64)
+	if !exist {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "Can not find User ZCode"})
+		return
+	}
+	usr, err := h.UserApplication.FindByUserZCode(uzcodeuint)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+	var usrInfo request.UserinfoDTO
+	usrInfo.UserID = usr.ID
+	usrInfo.UserName = usr.Username
+	usrInfo.UserEmail = usr.Email
+	usrInfo.UserZCode = usr.ZCodeID
+	c.JSON(http.StatusOK, gin.H{
+		"message": "successfully find the user",
+		"data":    usrInfo,
 	})
 }

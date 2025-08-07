@@ -46,3 +46,35 @@ type UserRoleDTO struct {
 	RoleID     uint
 	AssignedBy uint
 }
+
+type FindRoleByIDReDTO struct {
+	RoleID uint
+}
+
+type DeleteRoleReDTO struct {
+	RoleID []uint
+}
+
+type DeleteAuthPointReDTO struct {
+	AuthPointID []uint
+}
+
+type FindAuthPointByIDReDTO struct {
+	AuthPointID uint
+}
+
+type DeleteRoleAuthReDTO struct {
+	RoleAuthPointIDs []uint
+}
+
+type FindAuthPointByRoleID struct {
+	RoleID uint
+}
+
+type DeleteUserRoleReDTO struct {
+	UserRoleID []uint
+}
+
+type FindUserRoleByIDReDTO struct {
+	UserRoleID uint
+}

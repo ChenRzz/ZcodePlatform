@@ -1,7 +1,7 @@
 package jwt
 
 import (
-	"MScProject/auth_management/token/base_Interface"
+	"MScProject/authentication/token/base_Interface"
 	"MScProject/core_app/infrastructure"
 	"context"
 	"fmt"
@@ -13,8 +13,9 @@ import (
 var secretKey = []byte("hsaihdnwjsahiu712iwj12w")
 
 type JwtClaims struct {
-	UserID   uint
-	Username string
+	UserID    uint
+	Username  string
+	UserZcode uint64
 
 	jwt.RegisteredClaims
 }
@@ -32,8 +33,9 @@ func NewJwtManagement() *JwtManagement {
 
 func (j *JwtManagement) GenerateToken(userinfo *base_Interface.Userinfo) (tokenString string, err error) {
 	claim := JwtClaims{
-		UserID:   userinfo.UserIDInfo,
-		Username: userinfo.UsernameInfo,
+		UserID:    userinfo.UserIDInfo,
+		Username:  userinfo.UsernameInfo,
+		UserZcode: userinfo.UserZcodeInfo,
 		RegisteredClaims: jwt.RegisteredClaims{
 			Subject:   string(userinfo.UserIDInfo), // 用户ID作为主题
 			ExpiresAt: jwt.NewNumericDate(time.Now().Add(24 * time.Hour)),
@@ -75,8 +77,9 @@ func (j *JwtManagement) CheckParseToken(token string) (*base_Interface.Userinfo,
 		return nil, fmt.Errorf("token is invalid")
 	}
 	userinfo := &base_Interface.Userinfo{
-		UserIDInfo:   claims.UserID,
-		UsernameInfo: claims.Username,
+		UserIDInfo:    claims.UserID,
+		UsernameInfo:  claims.Username,
+		UserZcodeInfo: claims.UserZcode,
 	}
 	return userinfo, nil
 }

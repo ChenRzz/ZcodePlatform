@@ -1,7 +1,9 @@
 package application
 
 import (
+	"MScProject/core_app/domain/entities"
 	"MScProject/core_app/domain/service"
+	"MScProject/core_app/dto/request"
 	"MScProject/core_app/infrastructure"
 	"errors"
 	"gorm.io/gorm"
@@ -9,11 +11,12 @@ import (
 
 type IUserApplication interface {
 	Register(username, password, email string) error
-	Login(username, password string) (uint, error)
+	Login(username, password string) (uint, uint64, error)
 	LogOff(userid uint, password string) error
 	ChangeUserPassword(userid uint, oldPassword, newPassword string) error
 	AdminRestPassword(username string, newPassword string) error
-	GetUserInfo(userid uint) (username, email string, err error)
+	GetUserInfo(userid uint) (*request.UserinfoDTO, error)
+	FindByUserZCode(userZcode uint64) (*entities.User, error)
 }
 
 type UserApplication struct {
@@ -31,16 +34,16 @@ func (u *UserApplication) Register(username, password, email string) error {
 	})
 	return err
 }
-func (u *UserApplication) Login(username, password string) (uint, error) {
+func (u *UserApplication) Login(username, password string) (uint, uint64, error) {
 	db := infrastructure.GetDB()
-	valid, err, uid := u.UserService.Login(db, username, password)
+	valid, err, uid, uzcode := u.UserService.Login(db, username, password)
 	if err != nil {
-		return 0, err
+		return 0, 0, err
 	}
 	if !valid {
-		return 0, errors.New("Incorrect username ot password")
+		return 0, 0, errors.New("Incorrect username ot password")
 	}
-	return uid, nil
+	return uid, uzcode, nil
 
 }
 func (u *UserApplication) LogOff(userid uint, password string) error {
@@ -75,11 +78,17 @@ func (u *UserApplication) AdminRestPassword(username string, newPassword string)
 	})
 
 }
-func (u *UserApplication) GetUserInfo(userid uint) (username, email string, err error) {
+func (u *UserApplication) GetUserInfo(userid uint) (*request.UserinfoDTO, error) {
 	db := infrastructure.GetDB()
-	usernames, emails, err := u.UserService.GetUserInfo(db, userid)
+	userinfo, err := u.UserService.GetUserInfo(db, userid)
 	if err != nil {
-		return "", "", err
+		return nil, err
 	}
-	return usernames, emails, nil
+	return userinfo, nil
+}
+
+func (u *UserApplication) FindByUserZCode(userZcode uint64) (*entities.User, error) {
+	db := infrastructure.GetDB()
+	user, err := u.UserService.FindByUserZCode(db, userZcode)
+	return user, err
 }

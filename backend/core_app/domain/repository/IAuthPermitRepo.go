@@ -4,6 +4,7 @@ import (
 	"MScProject/core_app/domain/entities"
 	"MScProject/core_app/dto"
 	"gorm.io/gorm"
+	"gorm.io/gorm/clause"
 )
 
 type IAuthPermitRepo interface {
@@ -110,7 +111,10 @@ func (a *AuthPermitRepo) FindAllAuthPoints(db *gorm.DB) ([]*entities.AuthPoint, 
 }
 
 func (a *AuthPermitRepo) SetAuthPointToRole(db *gorm.DB, roleAuthpoint []*entities.RoleAuthPoint) error {
-	err := db.Create(roleAuthpoint).Error
+	err := db.Clauses(clause.OnConflict{
+		Columns:   []clause.Column{{Name: "role_id"}, {Name: "auth_point_id"}},
+		DoNothing: true,
+	}).Create(&roleAuthpoint).Error
 	if err != nil {
 		return err
 	}
@@ -142,7 +146,11 @@ func (a *AuthPermitRepo) FindAuthPointsByRoleID(db *gorm.DB, RoleID uint) ([]*dt
 }
 
 func (a *AuthPermitRepo) SetUserRoles(db *gorm.DB, userRole []*entities.UserRole) error {
-	err := db.Create(&userRole).Error
+
+	err := db.Clauses(clause.OnConflict{
+		Columns:   []clause.Column{{Name: "role_id"}, {Name: "user_id"}},
+		DoNothing: true,
+	}).Create(&userRole).Error
 	return err
 }
 func (a *AuthPermitRepo) DeleteUserRoles(db *gorm.DB, userRoleID []uint) error {

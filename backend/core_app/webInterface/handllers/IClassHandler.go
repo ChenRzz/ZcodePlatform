@@ -2,7 +2,8 @@ package handllers
 
 import (
 	"MScProject/core_app/application"
-	"MScProject/core_app/webInterface/request_struct"
+	"MScProject/core_app/dto/request"
+	"MScProject/core_app/dto/response"
 	"github.com/gin-gonic/gin"
 	"net/http"
 )
@@ -13,6 +14,7 @@ type IClassHandler interface {
 	UpdateClassInfo(c *gin.Context)
 	FindClassByID(c *gin.Context)
 	FindClassByClassCode(c *gin.Context)
+	FindAllClasses(c *gin.Context)
 
 	CreateLecture(c *gin.Context)
 	DeleteLecture(c *gin.Context)
@@ -25,6 +27,7 @@ type IClassHandler interface {
 	SetRoleForParticipant(c *gin.Context)
 	FindClassesByParticipantZCodeID(c *gin.Context)
 	FindParticipantsByClassID(c *gin.Context)
+	FindUserClasses(c *gin.Context)
 }
 
 type ClassHandler struct {
@@ -36,7 +39,7 @@ func NewClassHandler(classApplication application.IClassApplication) *ClassHandl
 }
 
 func (h *ClassHandler) CreateClass(c *gin.Context) {
-	var req request_struct.CreateClassRequest
+	var req request.CreateClass
 	if err := c.ShouldBind(&req); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
@@ -50,7 +53,7 @@ func (h *ClassHandler) CreateClass(c *gin.Context) {
 	return
 }
 func (h *ClassHandler) DeleteClass(c *gin.Context) {
-	var req request_struct.DeleteClassRequest
+	var req request.DeleteClass
 	if err := c.ShouldBind(&req); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 	}
@@ -64,7 +67,7 @@ func (h *ClassHandler) DeleteClass(c *gin.Context) {
 }
 
 func (h *ClassHandler) UpdateClassInfo(c *gin.Context) {
-	var req request_struct.UpdateClassInfoRequest
+	var req request.UpdateClassInfo
 	if err := c.ShouldBind(&req); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
@@ -79,7 +82,7 @@ func (h *ClassHandler) UpdateClassInfo(c *gin.Context) {
 }
 
 func (h *ClassHandler) FindClassByID(c *gin.Context) {
-	var req request_struct.FindClassByIDRequest
+	var req request.FindClassByID
 	if err := c.ShouldBind(&req); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 	}
@@ -88,14 +91,22 @@ func (h *ClassHandler) FindClassByID(c *gin.Context) {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
+	var classinfo response.ClassInfo
+	classinfo.ClassID = class.ID
+	classinfo.ClassName = class.ClassName
+	classinfo.ClassCode = class.ClassCode
+	classinfo.ClassManagerName = class.ClassManagerName
+	classinfo.ClassManagerZCodeID = class.ClassManagerZCodeID
+	classinfo.CreatedAt = class.CreatedAt
+	classinfo.ClassDescription = class.ClassDescription
 	c.JSON(http.StatusOK, gin.H{
 		"message": "class information",
-		"data":    class,
+		"data":    classinfo,
 	})
 	return
 }
 func (h *ClassHandler) FindClassByClassCode(c *gin.Context) {
-	var req request_struct.FindClassByClassCodeRequest
+	var req request.FindClassByClassCode
 	if err := c.ShouldBind(&req); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 	}
@@ -104,15 +115,23 @@ func (h *ClassHandler) FindClassByClassCode(c *gin.Context) {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
+	var classinfo response.ClassInfo
+	classinfo.ClassID = class.ID
+	classinfo.ClassName = class.ClassName
+	classinfo.ClassCode = class.ClassCode
+	classinfo.ClassManagerName = class.ClassManagerName
+	classinfo.ClassManagerZCodeID = class.ClassManagerZCodeID
+	classinfo.CreatedAt = class.CreatedAt
+	classinfo.ClassDescription = class.ClassDescription
 	c.JSON(http.StatusOK, gin.H{
 		"message": "class information",
-		"data":    class,
+		"data":    classinfo,
 	})
 	return
 }
 
 func (h *ClassHandler) CreateLecture(c *gin.Context) {
-	var req request_struct.CreateLectureRequest
+	var req request.CreateLecture
 	if err := c.ShouldBind(&req); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 	}
@@ -125,7 +144,7 @@ func (h *ClassHandler) CreateLecture(c *gin.Context) {
 	return
 }
 func (h *ClassHandler) DeleteLecture(c *gin.Context) {
-	var req request_struct.DeleteLectureRequest
+	var req request.DeleteLecture
 	if err := c.ShouldBind(&req); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 	}
@@ -138,7 +157,7 @@ func (h *ClassHandler) DeleteLecture(c *gin.Context) {
 	return
 }
 func (h *ClassHandler) UpdateLectureInfo(c *gin.Context) {
-	var req request_struct.UpdateLectureInfoRequest
+	var req request.UpdateLectureInfo
 	if err := c.ShouldBind(&req); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
@@ -152,7 +171,7 @@ func (h *ClassHandler) UpdateLectureInfo(c *gin.Context) {
 	return
 }
 func (h *ClassHandler) FindLectureByLectureID(c *gin.Context) {
-	var req request_struct.FindLectureByIDRequest
+	var req request.FindLectureByID
 	if err := c.ShouldBind(&req); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 	}
@@ -161,14 +180,33 @@ func (h *ClassHandler) FindLectureByLectureID(c *gin.Context) {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
+	//LectureID          uint       `json:"lecture_id"`
+	//CreatedAt          *time.Time `json:"created_at"`
+	//LectureName        string     `json:"lecture_name"`
+	//LectureDescription string     `json:"lecture_description"`
+	//ClassID            uint       `json:"class_id"`
+	//StartTime          *time.Time `json:"start_time"`
+	//EndTime            *time.Time `json:"end_time"`
+	//LecturerZCodeID    uint64     `json:"lecturer_z_code_id"`
+	//LecturerName       string     `json:"lecturer_name"`
+	var lectureinfo response.LectureInfo
+	lectureinfo.LectureID = lecture.ID
+	lectureinfo.CreatedAt = lecture.CreatedAt
+	lectureinfo.LectureName = lecture.LectureName
+	lectureinfo.LectureDescription = lecture.LectureDescription
+	lectureinfo.ClassID = lecture.ClassID
+	lectureinfo.StartTime = lecture.EndTime
+	lectureinfo.LecturerZCodeID = lecture.LecturerZCodeID
+	lectureinfo.LecturerName = lecture.LecturerName
+	lectureinfo.EndTime = lecture.EndTime
 	c.JSON(http.StatusOK, gin.H{
 		"message": "lecture information",
-		"data":    lecture,
+		"data":    lectureinfo,
 	})
 	return
 }
 func (h *ClassHandler) FindLecturesByClassID(c *gin.Context) {
-	var req request_struct.FindLecturesByClassIDRequest
+	var req request.FindLecturesByClassID
 	if err := c.ShouldBind(&req); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 	}
@@ -177,15 +215,29 @@ func (h *ClassHandler) FindLecturesByClassID(c *gin.Context) {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
+	var lecturesinfo []response.LectureInfo
+	for _, lecture := range lectures {
+		var lectureinfo response.LectureInfo
+		lectureinfo.LectureID = lecture.ID
+		lectureinfo.CreatedAt = lecture.CreatedAt
+		lectureinfo.LectureName = lecture.LectureName
+		lectureinfo.LectureDescription = lecture.LectureDescription
+		lectureinfo.ClassID = lecture.ClassID
+		lectureinfo.StartTime = lecture.EndTime
+		lectureinfo.LecturerZCodeID = lecture.LecturerZCodeID
+		lectureinfo.LecturerName = lecture.LecturerName
+		lectureinfo.EndTime = lecture.EndTime
+		lecturesinfo = append(lecturesinfo, lectureinfo)
+	}
 	c.JSON(http.StatusOK, gin.H{
 		"message": "lecture information",
-		"data":    lectures,
+		"data":    lecturesinfo,
 	})
 	return
 }
 
 func (h *ClassHandler) AddParticipantToClass(c *gin.Context) {
-	var req request_struct.AddParticipantToClassRequest
+	var req request.AddParticipantToClass
 	if err := c.ShouldBind(&req); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
@@ -199,7 +251,7 @@ func (h *ClassHandler) AddParticipantToClass(c *gin.Context) {
 	return
 }
 func (h *ClassHandler) DeleteParticipantFromClass(c *gin.Context) {
-	var req request_struct.DeleteClassParticipantsRequest
+	var req request.DeleteClassParticipants
 	if err := c.ShouldBind(&req); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
@@ -213,7 +265,7 @@ func (h *ClassHandler) DeleteParticipantFromClass(c *gin.Context) {
 	return
 }
 func (h *ClassHandler) SetRoleForParticipant(c *gin.Context) {
-	var req request_struct.SetRoleForParticipantRequest
+	var req request.SetRoleForParticipant
 	if err := c.ShouldBind(&req); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
@@ -227,34 +279,105 @@ func (h *ClassHandler) SetRoleForParticipant(c *gin.Context) {
 	return
 }
 func (h *ClassHandler) FindClassesByParticipantZCodeID(c *gin.Context) {
-	var req request_struct.FindClassByParticipantZCodeIDRequest
-	if err := c.ShouldBind(&req); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+	uZcode, exist := c.Get("Zcode")
+	if !exist {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Can not find User Zcode"})
+		return
 	}
-	classes, err := h.ClassApplication.FindClassesByParticipantZCodeID(req.UserZCodeID)
+	userZcode := uZcode.(uint64)
+	classes, err := h.ClassApplication.FindClassesByParticipantZCodeID(userZcode)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
+	var classparticipantinfo []response.ClassParticipantInfo
+	for _, classpar := range classes {
+		var classparticipant response.ClassParticipantInfo
+		classparticipant.ClassParticipantID = classpar.ID
+		classparticipant.ClassID = classpar.ClassID
+		classparticipant.ClassName = classpar.ClassName
+		classparticipant.UserZCodeID = classpar.UserZCodeID
+		classparticipant.Username = classpar.Username
+		classparticipant.UserRole = classpar.UserRole
+		classparticipantinfo = append(classparticipantinfo, classparticipant)
+
+	}
+
 	c.JSON(http.StatusOK, gin.H{
 		"message": "classes and participants information",
-		"data":    classes,
+		"data":    classparticipantinfo,
 	})
 	return
 }
 func (h *ClassHandler) FindParticipantsByClassID(c *gin.Context) {
-	var req request_struct.FindParticipantByClassID
+	var req request.FindParticipantByClassID
 	if err := c.ShouldBind(&req); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 	}
-	Participants, err := h.ClassApplication.FindParticipantsByClassID(req.ClassID)
+	classes, err := h.ClassApplication.FindParticipantsByClassID(req.ClassID)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+	var classparticipantinfo []response.ClassParticipantInfo
+	for _, classpar := range classes {
+		var classparticipant response.ClassParticipantInfo
+		classparticipant.ClassParticipantID = classpar.ID
+		classparticipant.ClassID = classpar.ClassID
+		classparticipant.ClassName = classpar.ClassName
+		classparticipant.UserZCodeID = classpar.UserZCodeID
+		classparticipant.Username = classpar.Username
+		classparticipant.UserRole = classpar.UserRole
+		classparticipantinfo = append(classparticipantinfo, classparticipant)
+
+	}
+	c.JSON(http.StatusOK, gin.H{
+		"message": "classes and participants information",
+		"data":    classparticipantinfo,
+	})
+	return
+}
+
+func (h *ClassHandler) FindAllClasses(c *gin.Context) {
+	classes, err := h.ClassApplication.FindAllClasses()
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+	var classesinfo []response.ClassInfo
+	for _, class := range classes {
+		var classinfo response.ClassInfo
+		classinfo.ClassID = class.ID
+		classinfo.ClassName = class.ClassName
+		classinfo.ClassCode = class.ClassCode
+		classinfo.ClassManagerName = class.ClassManagerName
+		classinfo.ClassManagerZCodeID = class.ClassManagerZCodeID
+		classinfo.CreatedAt = class.CreatedAt
+		classinfo.ClassDescription = class.ClassDescription
+		classesinfo = append(classesinfo, classinfo)
+	}
+	c.JSON(http.StatusOK, gin.H{
+		"message": "successfully get all classes",
+		"data":    classesinfo,
+	})
+	return
+}
+
+func (h *ClassHandler) FindUserClasses(c *gin.Context) {
+	uZcode, exist := c.Get("Zcode")
+	if !exist {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Can not find User Zcode"})
+		return
+	}
+	userZcode := uZcode.(uint64)
+	userJoinedclasses, err := h.ClassApplication.FindUserClasses(userZcode)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
 	c.JSON(http.StatusOK, gin.H{
-		"message": "classes and participants information",
-		"data":    Participants,
+		"message": "successfully find the classes",
+		"data":    userJoinedclasses,
 	})
 	return
 }

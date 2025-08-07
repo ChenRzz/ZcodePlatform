@@ -1,7 +1,7 @@
 package middleware
 
 import (
-	"MScProject/auth_management/token/base_Interface"
+	"MScProject/authentication/token/base_Interface"
 	"github.com/gin-gonic/gin"
 	"net/http"
 	"strings"
@@ -37,6 +37,7 @@ func (a *AuthMiddleWare) CheckToken() gin.HandlerFunc {
 		}
 		c.Set("user_id", userinfo.UserIDInfo)
 		c.Set("username", userinfo.UsernameInfo)
+		c.Set("Zcode", userinfo.UserZcodeInfo)
 		c.Next()
 	}
 }

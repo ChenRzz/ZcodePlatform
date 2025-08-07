@@ -19,5 +19,6 @@ func UserRouter(userHandler *handllers.UserHandler) {
 		authUserGroup.POST("/change_password", userHandler.ChangeUserPassword)
 		authUserGroup.POST("/admin_reset_password", userHandler.AdminRestPassword)
 		authUserGroup.GET("/userinfo", userHandler.GetUserInfo)
+		authUserGroup.POST("/userinfo/byZcode", userHandler.FindByUserZCode)
 	}
 }

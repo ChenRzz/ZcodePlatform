@@ -2,6 +2,7 @@ package repository
 
 import (
 	"MScProject/core_app/domain/entities"
+	"MScProject/core_app/dto/response"
 	"errors"
 	"gorm.io/gorm"
 )
@@ -12,6 +13,7 @@ type IClassRepo interface {
 	DeleteClass(db *gorm.DB, classID uint) error
 	FindClassByID(db *gorm.DB, classID uint) (*entities.Class, error)
 	FindClassByClassCode(db *gorm.DB, classCode string) (*entities.Class, error)
+	FindAllClasses(db *gorm.DB) ([]*entities.Class, error)
 
 	CreateLecture(db *gorm.DB, lecture *entities.Lecture) error
 	UpdateLecture(db *gorm.DB, lecture *entities.Lecture) error
@@ -25,6 +27,7 @@ type IClassRepo interface {
 	FindClassParticipantByID(db *gorm.DB, classParticipantID uint) (*entities.ClassParticipants, error)
 	FindParticipantsByClassID(db *gorm.DB, classID uint) ([]*entities.ClassParticipants, error)
 	FindClassByParticipantsZCodeID(db *gorm.DB, participantZCodeID uint64) ([]*entities.ClassParticipants, error)
+	FindUserClasses(db *gorm.DB, participantZCodeID uint64) ([]*response.UserJoinedClassesInfo, error)
 }
 
 type ClassRepo struct {
@@ -123,7 +126,7 @@ func (c *ClassRepo) AddClassParticipant(db *gorm.DB, classParticipant *entities.
 func (c *ClassRepo) DeleteClassParticipant(db *gorm.DB, classParticipantID uint) error {
 	err := db.Delete(&entities.ClassParticipants{}, classParticipantID).Error
 	if err != nil {
-		return errors.New("Database: failed to logoff user from the class")
+		return errors.New("Database: failed to delete user from the class")
 	}
 	return nil
 }
@@ -154,9 +157,36 @@ func (c *ClassRepo) FindParticipantsByClassID(db *gorm.DB, classID uint) ([]*ent
 }
 func (c *ClassRepo) FindClassByParticipantsZCodeID(db *gorm.DB, participantZCodeID uint64) ([]*entities.ClassParticipants, error) {
 	var classparticipants []*entities.ClassParticipants
-	err := db.Where("UserZCodeID=?", participantZCodeID).Find(&classparticipants).Error
+	err := db.Where("user_zcode_id=?", participantZCodeID).Find(&classparticipants).Error
 	if err != nil {
 		return nil, errors.New("Database: failed to find class")
 	}
 	return classparticipants, nil
+}
+
+func (c *ClassRepo) FindAllClasses(db *gorm.DB) ([]*entities.Class, error) {
+	var classes []*entities.Class
+	err := db.Find(&classes).Error
+	if err != nil {
+		return nil, err
+	}
+	return classes, nil
+}
+
+func (c *ClassRepo) FindUserClasses(db *gorm.DB, participantZCodeID uint64) ([]*response.UserJoinedClassesInfo, error) {
+	var myclasses []*response.UserJoinedClassesInfo
+	// ClassParticipantID uint       `json:"class_participant_id"`
+	//    ClassID            uint       `json:"class_id"`
+	//    ClassName          uint       `json:"class_name"`
+	//    ClassCode          string     `json:"class_code"`
+	//    ClassManagerName   string     `json:"class_manager_name"`
+	//    CreatedAt          *time.Time `json:"created_at"
+	sql := `select cp.id as class_participant_id, c.id as class_id, c.class_name, c.class_code,c.class_manager_name,c.created_at
+from class_participants cp 
+ join 
+    classes c on cp.class_id= c.id
+where cp.user_zcode_id=?
+`
+	err := db.Raw(sql, participantZCodeID).Scan(&myclasses).Error
+	return myclasses, err
 }

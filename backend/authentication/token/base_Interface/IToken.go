@@ -1,8 +1,9 @@
 package base_Interface
 
 type Userinfo struct {
-	UserIDInfo   uint
-	UsernameInfo string
+	UserIDInfo    uint
+	UserZcodeInfo uint64
+	UsernameInfo  string
 }
 
 type IToken[T any] interface {

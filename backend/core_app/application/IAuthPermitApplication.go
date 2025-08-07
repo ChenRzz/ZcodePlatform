@@ -8,27 +8,6 @@ import (
 	"gorm.io/gorm"
 )
 
-//CreateRole(db *gorm.DB, roleRequest *dto.CreateRoleRequestDTO) error
-//	UpdateRole(db *gorm.DB, rolerequest *dto.UpdateRoleRequestDTO) error
-//	FindRoleByID(db *gorm.DB, roleID uint) (*entities.Role, error)
-//	DeleteRole(db *gorm.DB, roleID []uint) error
-//	FindAllRoles(db *gorm.DB) ([]*entities.Role, error)
-//
-//	CreateAuthPoint(db *gorm.DB, authDTO *dto.CreateAuthPointRequestDTO) error
-//	UpdateAuthPoint(db *gorm.DB, authDTO *dto.UpdateAuthPointRequestDTO) error
-//	DeleteAuthPoint(db *gorm.DB, authpointID []uint) error
-//	FindAuthPointByID(db *gorm.DB, authPointID uint) (*entities.AuthPoint, error)
-//	FindAllAuthPoints(db *gorm.DB) ([]*entities.AuthPoint, error)
-//
-//	SetAuthPointToRole(db *gorm.DB, roleAuthpoint []*dto.AuthPointRoleDTO) error
-//	DeleteAuthPointToRole(db *gorm.DB, roleAuthPointID []uint) error
-//	FindAuthPointsByRoleID(db *gorm.DB, RoleID uint) ([]*dto.RoleAuthPoints, error)
-//
-//	SetUserRoles(db *gorm.DB, userRole []*dto.UserRoleDTO) error
-//	DeleteUserRoles(db *gorm.DB, userRoleID []uint) error
-//	FindUserRoleByID(db *gorm.DB, userRoleID uint) (*entities.UserRole, error)
-//	FindUserRoleByUserID(db *gorm.DB, UserID uint) ([]*dto.UserRoles, error)
-
 type IAuthPermitApplication interface {
 	CreateRole(roleRequest *dto.CreateRoleRequestDTO) error
 	UpdateRole(rolerequest *dto.UpdateRoleRequestDTO) error
