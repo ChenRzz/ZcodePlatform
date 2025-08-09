@@ -23,6 +23,7 @@ type IAuthPermitRepo interface {
 	SetAuthPointToRole(db *gorm.DB, roleAuthpoint []*entities.RoleAuthPoint) error
 	DeleteAuthPointToRole(db *gorm.DB, roleAuthPointID []uint) error
 	FindAuthPointsByRoleID(db *gorm.DB, RoleID uint) ([]*dto.RoleAuthPoints, error)
+	FindRoleIDsByAuthPointID(db *gorm.DB, AuthPointID []uint) ([]uint, error)
 
 	SetUserRoles(db *gorm.DB, userRole []*entities.UserRole) error
 	DeleteUserRoles(db *gorm.DB, userRoleID []uint) error
@@ -144,7 +145,16 @@ func (a *AuthPermitRepo) FindAuthPointsByRoleID(db *gorm.DB, RoleID uint) ([]*dt
 	err := db.Raw(sql, RoleID).Scan(&result).Error
 	return result, err
 }
-
+func (a *AuthPermitRepo) FindRoleIDsByAuthPointID(db *gorm.DB, AuthPointID []uint) ([]uint, error) {
+	var roleIds []uint
+	err := db.Table("role_auth_point").
+		Where("auth_point_id IN ?", AuthPointID).
+		Pluck("role_id", &roleIds).Error
+	if err != nil {
+		return nil, err
+	}
+	return roleIds, nil
+}
 func (a *AuthPermitRepo) SetUserRoles(db *gorm.DB, userRole []*entities.UserRole) error {
 
 	err := db.Clauses(clause.OnConflict{

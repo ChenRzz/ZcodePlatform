@@ -55,7 +55,6 @@ func (h *UserHandler) Login(c *gin.Context) {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err})
 		return
 	}
-
 	tk, err := h.AuthToken.GenerateToken(&base_Interface.Userinfo{uid, uzcode, req.Username})
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})

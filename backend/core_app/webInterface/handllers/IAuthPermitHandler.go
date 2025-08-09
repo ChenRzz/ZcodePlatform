@@ -35,7 +35,7 @@ type AuthPermitHandler struct {
 }
 
 func NewAuthPermitHandler(authPermitHandler application.IAuthPermitApplication) *AuthPermitHandler {
-	return &AuthPermitHandler{AuthPermitApplication: authPermitHandler}
+	return &AuthPermitHandler{authPermitHandler}
 }
 
 func (a *AuthPermitHandler) CreateRole(c *gin.Context) {
@@ -84,6 +84,7 @@ func (a *AuthPermitHandler) FindRoleByID(c *gin.Context) {
 	return
 }
 func (a *AuthPermitHandler) DeleteRole(c *gin.Context) {
+
 	var req dto.DeleteRoleReDTO
 	if err := c.ShouldBind(&req); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
@@ -125,6 +126,7 @@ func (a *AuthPermitHandler) CreateAuthPoint(c *gin.Context) {
 	return
 }
 func (a *AuthPermitHandler) UpdateAuthPoint(c *gin.Context) {
+
 	var req dto.UpdateAuthPointRequestDTO
 	if err := c.ShouldBind(&req); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
@@ -139,6 +141,7 @@ func (a *AuthPermitHandler) UpdateAuthPoint(c *gin.Context) {
 	return
 }
 func (a *AuthPermitHandler) DeleteAuthPoint(c *gin.Context) {
+
 	var req dto.DeleteAuthPointReDTO
 	if err := c.ShouldBind(&req); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
@@ -183,6 +186,7 @@ func (a *AuthPermitHandler) FindAllAuthPoints(c *gin.Context) {
 }
 
 func (a *AuthPermitHandler) SetAuthPointToRole(c *gin.Context) {
+
 	var req []*dto.AuthPointRoleDTO
 	if err := c.ShouldBind(&req); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
@@ -197,6 +201,7 @@ func (a *AuthPermitHandler) SetAuthPointToRole(c *gin.Context) {
 	return
 }
 func (a *AuthPermitHandler) DeleteAuthPointToRole(c *gin.Context) {
+
 	var req dto.DeleteRoleAuthReDTO
 	if err := c.ShouldBind(&req); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})

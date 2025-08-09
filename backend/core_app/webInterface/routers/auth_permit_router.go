@@ -28,7 +28,7 @@ import (
 //	FindUserRoleByUserID(c *gin.Context)
 func AuthPermitRouter(authhandler *handllers.AuthPermitHandler) {
 	authGroup := R.Group("/auth")
-	authGroup.Use(configs.AuthMiddleWares.CheckToken())
+	authGroup.Use(configs.AuthMiddleWares.CheckToken()).Use(configs.AuthMiddleWares.CheckPermissions())
 	roleGroup := authGroup.Group("/role")
 	{
 		//CreateRole(c *gin.Context)

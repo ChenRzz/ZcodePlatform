@@ -12,7 +12,8 @@ func UserRouter(userHandler *handllers.UserHandler) {
 		userGroup.POST("/login", userHandler.Login)
 	}
 	authUserGroup := R.Group("/auth_user")
-	authUserGroup.Use(configs.AuthMiddleWares.CheckToken())
+	authUserGroup.Use(configs.AuthMiddleWares.CheckToken()).Use(configs.AuthMiddleWares.CheckPermissions())
+
 	{
 		authUserGroup.POST("/logout", userHandler.Logout)
 		authUserGroup.POST("/logoff", userHandler.LogOff)

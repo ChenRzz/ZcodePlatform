@@ -27,7 +27,7 @@ import (
 func ClassRouter(classHandler *handllers.ClassHandler) {
 	classGroup := R.Group("/class")
 	classGroup.GET("/all", classHandler.FindAllClasses)
-	classGroup.Use(configs.AuthMiddleWares.CheckToken())
+	classGroup.Use(configs.AuthMiddleWares.CheckToken()).Use(configs.AuthMiddleWares.CheckPermissions())
 
 	{
 		classGroup.POST("/create", classHandler.CreateClass)

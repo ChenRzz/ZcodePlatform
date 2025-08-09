@@ -23,6 +23,7 @@ type IAuthPermitService interface {
 	SetAuthPointToRole(db *gorm.DB, roleAuthpoint []*dto.AuthPointRoleDTO) error
 	DeleteAuthPointToRole(db *gorm.DB, roleAuthPointID []uint) error
 	FindAuthPointsByRoleID(db *gorm.DB, RoleID uint) ([]*dto.RoleAuthPoints, error)
+	FindRoleIdsByAuthPointID(db *gorm.DB, AuthPointID []uint) ([]uint, error)
 
 	SetUserRoles(db *gorm.DB, userRole []*dto.UserRoleDTO) error
 	DeleteUserRoles(db *gorm.DB, userRoleID []uint) error
@@ -103,6 +104,9 @@ func (a *AuthPermitService) DeleteAuthPointToRole(db *gorm.DB, roleAuthPointID [
 }
 func (a *AuthPermitService) FindAuthPointsByRoleID(db *gorm.DB, RoleID uint) ([]*dto.RoleAuthPoints, error) {
 	return a.AuthPermitRepo.FindAuthPointsByRoleID(db, RoleID)
+}
+func (a *AuthPermitService) FindRoleIdsByAuthPointID(db *gorm.DB, AuthPointID []uint) ([]uint, error) {
+	return a.AuthPermitRepo.FindRoleIDsByAuthPointID(db, AuthPointID)
 }
 
 func (a *AuthPermitService) SetUserRoles(db *gorm.DB, userRole []*dto.UserRoleDTO) error {

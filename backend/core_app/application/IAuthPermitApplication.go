@@ -1,10 +1,12 @@
 package application
 
 import (
+	"MScProject/authentication/rbac"
 	"MScProject/core_app/domain/entities"
 	"MScProject/core_app/domain/service"
 	"MScProject/core_app/dto"
 	"MScProject/core_app/infrastructure"
+	"fmt"
 	"gorm.io/gorm"
 )
 
@@ -33,10 +35,11 @@ type IAuthPermitApplication interface {
 
 type AuthPermitApplication struct {
 	AuthPermitService service.IAuthPermitService
+	Rbac              rbac.IRbacService
 }
 
-func NewAuthPermitApplication(authPermitService service.IAuthPermitService) *AuthPermitApplication {
-	return &AuthPermitApplication{authPermitService}
+func NewAuthPermitApplication(authPermitService service.IAuthPermitService, rBac rbac.IRbacService) *AuthPermitApplication {
+	return &AuthPermitApplication{authPermitService, rBac}
 }
 
 func (a *AuthPermitApplication) CreateRole(roleRequest *dto.CreateRoleRequestDTO) error {
@@ -93,6 +96,16 @@ func (a *AuthPermitApplication) UpdateAuthPoint(authDTO *dto.UpdateAuthPointRequ
 	err := db.Transaction(func(tx *gorm.DB) error {
 		return a.AuthPermitService.UpdateAuthPoint(tx, authDTO)
 	})
+	if err != nil {
+		fmt.Println("failed to update authPoint" + err.Error())
+		return err
+	}
+
+	roleids, err := a.AuthPermitService.FindRoleIdsByAuthPointID(db, []uint{authDTO.AuthPointID})
+	if err != nil {
+		return err
+	}
+	err = a.Rbac.ExpireCacheAuth(roleids)
 	return err
 }
 func (a *AuthPermitApplication) DeleteAuthPoint(authpointID []uint) error {
@@ -100,6 +113,15 @@ func (a *AuthPermitApplication) DeleteAuthPoint(authpointID []uint) error {
 	err := db.Transaction(func(tx *gorm.DB) error {
 		return a.AuthPermitService.DeleteAuthPoint(tx, authpointID)
 	})
+	if err != nil {
+		fmt.Println("failed to Delete authPoint" + err.Error())
+		return err
+	}
+	roleids, err := a.AuthPermitService.FindRoleIdsByAuthPointID(db, authpointID)
+	if err != nil {
+		return err
+	}
+	err = a.Rbac.ExpireCacheAuth(roleids)
 	return err
 }
 func (a *AuthPermitApplication) FindAuthPointByID(authPointID uint) (*entities.AuthPoint, error) {
@@ -111,21 +133,42 @@ func (a *AuthPermitApplication) FindAllAuthPoints() ([]*entities.AuthPoint, erro
 	return a.AuthPermitService.FindAllAuthPoints(db)
 }
 
-func (a *AuthPermitApplication) SetAuthPointToRole(roleAuthpoint []*dto.AuthPointRoleDTO) error {
+func (a *AuthPermitApplication) SetAuthPointToRole(roleAuthpoints []*dto.AuthPointRoleDTO) error {
 	db := infrastructure.GetDB()
 	err := db.Transaction(func(tx *gorm.DB) error {
 
-		return a.AuthPermitService.SetAuthPointToRole(tx, roleAuthpoint)
+		return a.AuthPermitService.SetAuthPointToRole(tx, roleAuthpoints)
 	})
+	if err != nil {
+		fmt.Println("failed to set authPoint" + err.Error())
+		return err
+	}
+	roleidsMap := make(map[uint]struct{})
+	var roleids []uint
+
+	for _, roleAuthpoint := range roleAuthpoints {
+		if _, exists := roleidsMap[roleAuthpoint.RoleID]; !exists {
+			roleidsMap[roleAuthpoint.RoleID] = struct{}{}
+			roleids = append(roleids, roleAuthpoint.RoleID)
+		}
+	}
+	err = a.Rbac.ExpireCacheAuth(roleids)
 	return err
 }
 func (a *AuthPermitApplication) DeleteAuthPointToRole(roleAuthPointID []uint) error {
 	db := infrastructure.GetDB()
 	err := db.Transaction(func(tx *gorm.DB) error {
-
 		return a.AuthPermitService.DeleteAuthPointToRole(tx, roleAuthPointID)
 	})
+	sql := `SELECT DISTINCT role_id FROM role_auth_point WHERE id IN (?)`
+	var roleids []uint
+	err = db.Raw(sql, roleAuthPointID).Scan(&roleids).Error
+	if err != nil {
+		return err
+	}
+	err = a.Rbac.ExpireCacheAuth(roleids)
 	return err
+
 }
 func (a *AuthPermitApplication) FindAuthPointsByRoleID(RoleID uint) ([]*dto.RoleAuthPoints, error) {
 	db := infrastructure.GetDB()
