@@ -34,7 +34,7 @@ func (u *UserRepoMsql) FindByUsername(db *gorm.DB, username string) (*entities.U
 func (u *UserRepoMsql) FindByZCode(db *gorm.DB, UserZcode uint64) (*entities.User, error) {
 
 	var usr entities.User
-	err := db.Where("ZCodeID=?", UserZcode).First(&usr).Error
+	err := db.Where("z_code_id=?", UserZcode).First(&usr).Error
 	if err != nil {
 		return nil, errors.New("user not found")
 	}

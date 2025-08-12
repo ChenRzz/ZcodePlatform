@@ -3,6 +3,7 @@ package handllers
 import (
 	"MScProject/core_app/application"
 	"MScProject/core_app/dto"
+	"MScProject/core_app/dto/response"
 	"github.com/gin-gonic/gin"
 	"net/http"
 )
@@ -18,6 +19,7 @@ type IAuthPermitHandler interface {
 	UpdateAuthPoint(c *gin.Context)
 	DeleteAuthPoint(c *gin.Context)
 	FindAuthPointByID(c *gin.Context)
+	FindAuthPointByPermissionCode(c *gin.Context)
 	FindAllAuthPoints(c *gin.Context)
 
 	SetAuthPointToRole(c *gin.Context)
@@ -28,6 +30,7 @@ type IAuthPermitHandler interface {
 	DeleteUserRoles(c *gin.Context)
 	FindUserRoleByID(c *gin.Context)
 	FindUserRoleByUserID(c *gin.Context)
+	FindUserRoleByUID(c *gin.Context)
 }
 
 type AuthPermitHandler struct {
@@ -100,13 +103,21 @@ func (a *AuthPermitHandler) DeleteRole(c *gin.Context) {
 }
 func (a *AuthPermitHandler) FindAllRoles(c *gin.Context) {
 	roles, err := a.AuthPermitApplication.FindAllRoles()
+	var rolesinfo []*response.RoleInfo
+	for _, role := range roles {
+		var roleinfo response.RoleInfo
+		roleinfo.RoleID = role.ID
+		roleinfo.RoleName = role.RoleName
+		roleinfo.RoleDescription = role.Description
+		rolesinfo = append(rolesinfo, &roleinfo)
+	}
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
 	c.JSON(http.StatusOK, gin.H{
 		"message": "successfully get the role",
-		"data":    roles,
+		"data":    rolesinfo,
 	})
 	return
 }
@@ -161,26 +172,68 @@ func (a *AuthPermitHandler) FindAuthPointByID(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
-	authPoint, err := a.AuthPermitApplication.FindAuthPointByID(req.AuthPointID)
+	authpoint, err := a.AuthPermitApplication.FindAuthPointByID(req.AuthPointID)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
+	var authpointinfo response.AuthPointInfo
+	authpointinfo.AuthPointID = authpoint.ID
+	authpointinfo.RequestMethod = authpoint.RequestMethod
+	authpointinfo.RequestPath = authpoint.RequestPath
+	authpointinfo.PermissionCode = authpoint.PermissionCode
 	c.JSON(http.StatusOK, gin.H{
 		"message": "successfully get the AuthPoint",
-		"data":    authPoint,
+		"data":    authpointinfo,
 	})
 	return
 }
+func (a *AuthPermitHandler) FindAuthPointByPermissionCode(c *gin.Context) {
+	var req dto.FindAuthPointByPermissionCode
+	if err := c.ShouldBind(&req); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+	authpoint, err := a.AuthPermitApplication.FindAuthPointByPermissionCode(req.PermissionCode)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+	var authpointinfo response.AuthPointInfo
+	authpointinfo.AuthPointID = authpoint.ID
+	authpointinfo.RequestMethod = authpoint.RequestMethod
+	authpointinfo.RequestPath = authpoint.RequestPath
+	authpointinfo.PermissionCode = authpoint.PermissionCode
+	c.JSON(http.StatusOK, gin.H{
+		"message": "successfully get the AuthPoint",
+		"data":    authpointinfo,
+	})
+}
+
 func (a *AuthPermitHandler) FindAllAuthPoints(c *gin.Context) {
 	authPoints, err := a.AuthPermitApplication.FindAllAuthPoints()
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
+	//type AuthPointInfo struct {
+	//	AuthPointID    uint   `json:"auth_point_id"`
+	//	RequestMethod  string `json:"request_method"`
+	//	RequestPath    string `json:"request_path"`
+	//	PermissionCode string `json:"permission_code"`
+	//}
+	var authPointsinfo []*response.AuthPointInfo
+	for _, authpoint := range authPoints {
+		var authpointinfo response.AuthPointInfo
+		authpointinfo.AuthPointID = authpoint.ID
+		authpointinfo.RequestMethod = authpoint.RequestMethod
+		authpointinfo.RequestPath = authpoint.RequestPath
+		authpointinfo.PermissionCode = authpoint.PermissionCode
+		authPointsinfo = append(authPointsinfo, &authpointinfo)
+	}
 	c.JSON(http.StatusOK, gin.H{
 		"message": "successfully get all AuthPoints",
-		"data":    authPoints,
+		"data":    authPointsinfo,
 	})
 	return
 }
@@ -200,6 +253,7 @@ func (a *AuthPermitHandler) SetAuthPointToRole(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{"message": "successfully Set the AuthPoint to role"})
 	return
 }
+
 func (a *AuthPermitHandler) DeleteAuthPointToRole(c *gin.Context) {
 
 	var req dto.DeleteRoleAuthReDTO
@@ -207,7 +261,7 @@ func (a *AuthPermitHandler) DeleteAuthPointToRole(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
-	err := a.AuthPermitApplication.DeleteAuthPointToRole(req.RoleAuthPointIDs)
+	err := a.AuthPermitApplication.DeleteAuthPointToRole(req.RoleAuthPointID)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
@@ -290,6 +344,24 @@ func (a *AuthPermitHandler) FindUserRoleByUserID(c *gin.Context) {
 		return
 	}
 	userRoles, err := a.AuthPermitApplication.FindUserRoleByUserID(uiduint)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+	c.JSON(http.StatusOK, gin.H{
+		"message": "successfully get the UserRoles",
+		"data":    userRoles,
+	})
+	return
+}
+
+func (a *AuthPermitHandler) FindUserRoleByUID(c *gin.Context) {
+	var req dto.FindUserRoleByUIDRequest
+	if err := c.ShouldBind(&req); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+	userRoles, err := a.AuthPermitApplication.FindUserRoleByUserID(req.UserID)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return

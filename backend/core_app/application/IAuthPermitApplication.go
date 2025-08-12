@@ -14,21 +14,22 @@ type IAuthPermitApplication interface {
 	CreateRole(roleRequest *dto.CreateRoleRequestDTO) error
 	UpdateRole(rolerequest *dto.UpdateRoleRequestDTO) error
 	FindRoleByID(roleID uint) (*entities.Role, error)
-	DeleteRole(roleID []uint) error
+	DeleteRole(roleID uint) error
 	FindAllRoles() ([]*entities.Role, error)
 
 	CreateAuthPoint(authDTO *dto.CreateAuthPointRequestDTO) error
 	UpdateAuthPoint(authDTO *dto.UpdateAuthPointRequestDTO) error
-	DeleteAuthPoint(authpointID []uint) error
+	DeleteAuthPoint(authpointID uint) error
 	FindAuthPointByID(authPointID uint) (*entities.AuthPoint, error)
 	FindAllAuthPoints() ([]*entities.AuthPoint, error)
+	FindAuthPointByPermissionCode(permissionCode string) (*entities.AuthPoint, error)
 
 	SetAuthPointToRole(roleAuthpoint []*dto.AuthPointRoleDTO) error
-	DeleteAuthPointToRole(roleAuthPointID []uint) error
+	DeleteAuthPointToRole(roleAuthPointID uint) error
 	FindAuthPointsByRoleID(RoleID uint) ([]*dto.RoleAuthPoints, error)
 
 	SetUserRoles(userRole []*dto.UserRoleDTO) error
-	DeleteUserRoles(userRoleID []uint) error
+	DeleteUserRoles(userRoleID uint) error
 	FindUserRoleByID(userRoleID uint) (*entities.UserRole, error)
 	FindUserRoleByUserID(UserID uint) ([]*dto.UserRoles, error)
 }
@@ -66,7 +67,7 @@ func (a *AuthPermitApplication) FindRoleByID(roleID uint) (*entities.Role, error
 	})
 	return role, err
 }
-func (a *AuthPermitApplication) DeleteRole(roleID []uint) error {
+func (a *AuthPermitApplication) DeleteRole(roleID uint) error {
 	db := infrastructure.GetDB()
 	err := db.Transaction(func(tx *gorm.DB) error {
 		return a.AuthPermitService.DeleteRole(tx, roleID)
@@ -108,7 +109,7 @@ func (a *AuthPermitApplication) UpdateAuthPoint(authDTO *dto.UpdateAuthPointRequ
 	err = a.Rbac.ExpireCacheAuth(roleids)
 	return err
 }
-func (a *AuthPermitApplication) DeleteAuthPoint(authpointID []uint) error {
+func (a *AuthPermitApplication) DeleteAuthPoint(authpointID uint) error {
 	db := infrastructure.GetDB()
 	err := db.Transaction(func(tx *gorm.DB) error {
 		return a.AuthPermitService.DeleteAuthPoint(tx, authpointID)
@@ -117,7 +118,7 @@ func (a *AuthPermitApplication) DeleteAuthPoint(authpointID []uint) error {
 		fmt.Println("failed to Delete authPoint" + err.Error())
 		return err
 	}
-	roleids, err := a.AuthPermitService.FindRoleIdsByAuthPointID(db, authpointID)
+	roleids, err := a.AuthPermitService.FindRoleIdsByAuthPointID(db, []uint{authpointID})
 	if err != nil {
 		return err
 	}
@@ -131,6 +132,10 @@ func (a *AuthPermitApplication) FindAuthPointByID(authPointID uint) (*entities.A
 func (a *AuthPermitApplication) FindAllAuthPoints() ([]*entities.AuthPoint, error) {
 	db := infrastructure.GetDB()
 	return a.AuthPermitService.FindAllAuthPoints(db)
+}
+func (a *AuthPermitApplication) FindAuthPointByPermissionCode(permissionCode string) (*entities.AuthPoint, error) {
+	db := infrastructure.GetDB()
+	return a.AuthPermitService.FindAuthPointByPermissionCode(db, permissionCode)
 }
 
 func (a *AuthPermitApplication) SetAuthPointToRole(roleAuthpoints []*dto.AuthPointRoleDTO) error {
@@ -155,12 +160,12 @@ func (a *AuthPermitApplication) SetAuthPointToRole(roleAuthpoints []*dto.AuthPoi
 	err = a.Rbac.ExpireCacheAuth(roleids)
 	return err
 }
-func (a *AuthPermitApplication) DeleteAuthPointToRole(roleAuthPointID []uint) error {
+func (a *AuthPermitApplication) DeleteAuthPointToRole(roleAuthPointID uint) error {
 	db := infrastructure.GetDB()
 	err := db.Transaction(func(tx *gorm.DB) error {
 		return a.AuthPermitService.DeleteAuthPointToRole(tx, roleAuthPointID)
 	})
-	sql := `SELECT DISTINCT role_id FROM role_auth_point WHERE id IN (?)`
+	sql := `SELECT DISTINCT role_id FROM role_auth_point WHERE id = ?`
 	var roleids []uint
 	err = db.Raw(sql, roleAuthPointID).Scan(&roleids).Error
 	if err != nil {
@@ -189,7 +194,7 @@ func (a *AuthPermitApplication) SetUserRoles(userRole []*dto.UserRoleDTO) error 
 	})
 	return err
 }
-func (a *AuthPermitApplication) DeleteUserRoles(userRoleID []uint) error {
+func (a *AuthPermitApplication) DeleteUserRoles(userRoleID uint) error {
 	db := infrastructure.GetDB()
 	err := db.Transaction(func(tx *gorm.DB) error {
 

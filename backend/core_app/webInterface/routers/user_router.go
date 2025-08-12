@@ -12,7 +12,7 @@ func UserRouter(userHandler *handllers.UserHandler) {
 		userGroup.POST("/login", userHandler.Login)
 	}
 	authUserGroup := R.Group("/auth_user")
-	authUserGroup.Use(configs.AuthMiddleWares.CheckToken()).Use(configs.AuthMiddleWares.CheckPermissions())
+	authUserGroup.Use(configs.AuthMiddleWares.CheckToken())
 
 	{
 		authUserGroup.POST("/logout", userHandler.Logout)
@@ -21,5 +21,6 @@ func UserRouter(userHandler *handllers.UserHandler) {
 		authUserGroup.POST("/admin_reset_password", userHandler.AdminRestPassword)
 		authUserGroup.GET("/userinfo", userHandler.GetUserInfo)
 		authUserGroup.POST("/userinfo/byZcode", userHandler.FindByUserZCode)
+		authUserGroup.POST("/userinfo/byZcode_input", userHandler.FindByUserZCodeInput)
 	}
 }

@@ -13,6 +13,7 @@ type IClassRepo interface {
 	DeleteClass(db *gorm.DB, classID uint) error
 	FindClassByID(db *gorm.DB, classID uint) (*entities.Class, error)
 	FindClassByClassCode(db *gorm.DB, classCode string) (*entities.Class, error)
+	FindClassByManagerZCode(db *gorm.DB, managerZode uint64) ([]*entities.Class, error)
 	FindAllClasses(db *gorm.DB) ([]*entities.Class, error)
 
 	CreateLecture(db *gorm.DB, lecture *entities.Lecture) error
@@ -69,11 +70,19 @@ func (c *ClassRepo) FindClassByID(db *gorm.DB, classID uint) (*entities.Class, e
 }
 func (c *ClassRepo) FindClassByClassCode(db *gorm.DB, classCode string) (*entities.Class, error) {
 	var cls entities.Class
-	err := db.Where("ClassCode=?", classCode).First(&cls).Error
+	err := db.Where("class_code=?", classCode).First(&cls).Error
 	if err != nil {
 		return nil, errors.New("Database:class not found")
 	}
 	return &cls, nil
+}
+func (c *ClassRepo) FindClassByManagerZCode(db *gorm.DB, managerZode uint64) ([]*entities.Class, error) {
+	var classes []*entities.Class
+	err := db.Where("class_manager_zcode_id=?", managerZode).Find(&classes).Error
+	if err != nil {
+		return nil, err
+	}
+	return classes, nil
 }
 
 func (c *ClassRepo) CreateLecture(db *gorm.DB, lecture *entities.Lecture) error {

@@ -17,11 +17,11 @@ const Home = () => {
                     setClasses(data);
                 } else {
                     console.error("Invalid data format from GetAllClasses:", data);
-                    setClasses([]); // fallback，避免 null 出错
+                    setClasses([]);
                 }
             } catch (err) {
                 console.error("Failed to fetch classes:", err);
-                setClasses([]); // 防止异常后 classes 仍是 undefined/null
+                setClasses([]);
             }
         };
         fetchClasses();
@@ -29,13 +29,11 @@ const Home = () => {
 
     return (
         <>
-            {/* 欢迎语部分 */}
             <div className="d-flex flex-column align-items-center justify-content-center vh-50 bg-light text-center p-4">
                 <h1 className="display-4 text-dark mb-4">Welcome to Zcode Platform</h1>
                 <p className="lead text-muted">Your Collaborative Classroom Coding Solution</p>
             </div>
 
-            {/* 所有课程展示部分 */}
             <div className="container mt-4">
                 <h2 className="text-center mb-4">📚 All Classes</h2>
                 <div className="row">

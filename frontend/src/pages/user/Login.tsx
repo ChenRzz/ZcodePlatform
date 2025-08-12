@@ -4,7 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import { useUser } from '../../context/UserContext';
 const Login = () => {
     const navigate = useNavigate();
-    const {setUsername } = useUser();
+    const {setUsername,setUserZcode} = useUser();
     const [usernameinput, setUsernameInput] = useState('');
     const [password, setPassword] = useState('');
     const [message, setMessage] = useState('');
@@ -14,11 +14,14 @@ const Login = () => {
             const response = await loginUser(usernameinput, password);
             const token = response.token;
             const backendUsername = response.username;
+            const backendUserZcode=response.userZcode;
 
-            // 存储 Token 到本地（也可以根据需要使用 cookie）
             localStorage.setItem('token', token);
             localStorage.setItem('username', backendUsername);
-            setUsername(backendUsername)
+            localStorage.setItem('userZcode', backendUserZcode.toString());
+
+            setUsername(backendUsername);
+            setUserZcode(backendUserZcode);
             setMessage('🎉 Login successful!');
             setTimeout(() => navigate('/'), 1500); // 登录成功后跳转首页
         } catch (error: any) {

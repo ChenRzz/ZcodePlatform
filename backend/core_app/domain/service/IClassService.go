@@ -10,11 +10,12 @@ import (
 )
 
 type IClassService interface {
-	CreateClass(db *gorm.DB, className string, classCode string, classDescription string, classManagerZCodeID uint64) error
+	CreateClass(db *gorm.DB, className string, classCode string, classDescription string, classManagerZCodeID uint64, classManagerName string) error
 	DeleteClass(db *gorm.DB, classID uint) error
-	UpdateClassInfo(db *gorm.DB, classID uint, className string, classCode string, classDescription string, classManagerZCodeID uint64) error
+	UpdateClassInfo(db *gorm.DB, classID uint, className string, classCode string, classDescription string, classManagerZCodeID uint64, classManagerName string) error
 	FindClassByID(db *gorm.DB, classID uint) (*entities.Class, error)
 	FindClassByClassCode(db *gorm.DB, classCode string) (*entities.Class, error)
+	FindClassByManagerZCode(db *gorm.DB, managerZode uint64) ([]*entities.Class, error)
 	FindAllClasses(db *gorm.DB) ([]*entities.Class, error)
 
 	CreateLecture(db *gorm.DB, ClassID uint, LectureName string, LectureDescription string,
@@ -41,12 +42,12 @@ func NewClassService(ClassRepo repository.IClassRepo) *ClassService {
 	return &ClassService{ClassRepo: ClassRepo}
 }
 
-func (c *ClassService) CreateClass(db *gorm.DB, className string, classCode string, classDescription string, classManagerZCodeID uint64) error {
+func (c *ClassService) CreateClass(db *gorm.DB, className string, classCode string, classDescription string, classManagerZCodeID uint64, classManagerName string) error {
 	class, err := c.ClassRepo.FindClassByClassCode(db, classCode)
-	if class == nil {
+	if class != nil {
 		return errors.New("Class has already exists, please use another classCode.")
 	}
-	var newClass = entities.Class{ClassName: className, ClassCode: classCode, ClassDescription: classDescription, ClassManagerZCodeID: classManagerZCodeID}
+	var newClass = entities.Class{ClassName: className, ClassCode: classCode, ClassDescription: classDescription, ClassManagerZCodeID: classManagerZCodeID, ClassManagerName: classManagerName}
 	err = c.ClassRepo.CreateClass(db, &newClass)
 	if err != nil {
 		return err
@@ -60,7 +61,7 @@ func (c *ClassService) DeleteClass(db *gorm.DB, classID uint) error {
 	}
 	return nil
 }
-func (c *ClassService) UpdateClassInfo(db *gorm.DB, classID uint, className string, classCode string, classDescription string, classManagerZCodeID uint64) error {
+func (c *ClassService) UpdateClassInfo(db *gorm.DB, classID uint, className string, classCode string, classDescription string, classManagerZCodeID uint64, classManagerName string) error {
 	class, err := c.ClassRepo.FindClassByID(db, classID)
 	if err != nil {
 		return err
@@ -69,6 +70,7 @@ func (c *ClassService) UpdateClassInfo(db *gorm.DB, classID uint, className stri
 	class.ClassCode = classCode
 	class.ClassDescription = classDescription
 	class.ClassManagerZCodeID = classManagerZCodeID
+	class.ClassManagerName = classManagerName
 	err = c.ClassRepo.UpdateClass(db, class)
 	if err != nil {
 		return err
@@ -188,4 +190,8 @@ func (c *ClassService) FindAllClasses(db *gorm.DB) ([]*entities.Class, error) {
 
 func (c *ClassService) FindUserClasses(db *gorm.DB, participantZCodeID uint64) ([]*response.UserJoinedClassesInfo, error) {
 	return c.ClassRepo.FindUserClasses(db, participantZCodeID)
+}
+
+func (c *ClassService) FindClassByManagerZCode(db *gorm.DB, managerZode uint64) ([]*entities.Class, error) {
+	return c.ClassRepo.FindClassByManagerZCode(db, managerZode)
 }

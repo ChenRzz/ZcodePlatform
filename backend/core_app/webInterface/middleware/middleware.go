@@ -66,7 +66,7 @@ func (a *AuthMiddleWare) CheckPermissions() gin.HandlerFunc {
 		}
 		pass := a.rBacService.CheckUserAuthPoint(userPerm, apiUrl)
 		if !pass {
-			c.JSON(http.StatusUnauthorized, gin.H{"error": "insufficient auth"})
+			c.JSON(http.StatusMethodNotAllowed, gin.H{"error": "insufficient auth.ts"})
 			c.Abort()
 			return
 		}

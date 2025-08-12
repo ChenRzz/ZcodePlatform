@@ -6,6 +6,7 @@ import (
 	"MScProject/core_app/dto/request"
 	"github.com/gin-gonic/gin"
 	"net/http"
+	"strconv"
 	"strings"
 )
 
@@ -18,6 +19,7 @@ type IUserHandler interface {
 	AdminRestPassword(c *gin.Context)
 	GetUserInfo(c *gin.Context)
 	FindByUserZCode(c *gin.Context)
+	FindByUserZCodeInput(c *gin.Context)
 }
 
 type UserHandler struct {
@@ -60,10 +62,12 @@ func (h *UserHandler) Login(c *gin.Context) {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
+
 	c.JSON(http.StatusOK, gin.H{
-		"token":    tk,
-		"message":  "login success",
-		"username": req.Username,
+		"token":     tk,
+		"message":   "login success",
+		"username":  req.Username,
+		"userZcode": strconv.FormatUint(uzcode, 10),
 	})
 }
 func (h *UserHandler) Logout(c *gin.Context) {
@@ -175,6 +179,27 @@ func (h *UserHandler) FindByUserZCode(c *gin.Context) {
 		return
 	}
 	usr, err := h.UserApplication.FindByUserZCode(uzcodeuint)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+	var usrInfo request.UserinfoDTO
+	usrInfo.UserID = usr.ID
+	usrInfo.UserName = usr.Username
+	usrInfo.UserEmail = usr.Email
+	usrInfo.UserZCode = usr.ZCodeID
+	c.JSON(http.StatusOK, gin.H{
+		"message": "successfully find the user",
+		"data":    usrInfo,
+	})
+}
+func (h *UserHandler) FindByUserZCodeInput(c *gin.Context) {
+	var req request.FindByUserZCodeInputRequest
+	if err := c.ShouldBind(&req); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+	usr, err := h.UserApplication.FindByUserZCode(req.UserZcodeID)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return

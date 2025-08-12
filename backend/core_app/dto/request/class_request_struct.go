@@ -6,7 +6,8 @@ type CreateClass struct {
 	ClassName           string `json:"class_name"`
 	ClassCode           string `json:"class_code"`
 	ClassDescription    string `json:"class_description"`
-	ClassManagerZCodeID uint64 `json:"class_manager_z_code_id"`
+	ClassManagerZCodeID uint64 `json:"class_manager_z_code_id,string"`
+	ClassManagerName    string `json:"class_manager_name"`
 }
 
 type DeleteClass struct {
@@ -18,7 +19,8 @@ type UpdateClassInfo struct {
 	ClassName           string `json:"class_name"`
 	ClassCode           string `json:"class_code"`
 	ClassDescription    string `json:"class_description"`
-	ClassManagerZCodeID uint64 `json:"class_manager_z_code_id"`
+	ClassManagerZCodeID uint64 `json:"class_manager_z_code_id,string"`
+	ClassManagerName    string `json:"class_manager_name"`
 }
 
 type FindClassByID struct {
@@ -34,7 +36,7 @@ type CreateLecture struct {
 	LectureDescription string     `json:"lecture_description"`
 	StartTime          *time.Time `json:"start_time"`
 	EndTime            *time.Time `json:"end_time"`
-	LecturerZCodeID    uint64     `json:"lecturer_z_code_id"`
+	LecturerZCodeID    uint64     `json:"lecturer_z_code_id,string"`
 }
 
 type DeleteLecture struct {
@@ -48,7 +50,7 @@ type UpdateLectureInfo struct {
 	LectureDescription string     `json:"lecture_description"`
 	StartTime          *time.Time `json:"start_time"`
 	EndTime            *time.Time `json:"end_time"`
-	LecturerZCodeID    uint64     `json:"lecturer_z_code_id"`
+	LecturerZCodeID    uint64     `json:"lecturer_z_code_id,string"`
 }
 
 type FindLectureByID struct {
@@ -62,7 +64,7 @@ type FindLecturesByClassID struct {
 type AddParticipantToClass struct {
 	ClassID     uint   `json:"class_id"`
 	ClassName   string `json:"class_name"`
-	UserZCodeID uint64 `json:"user_z_code_id"`
+	UserZCodeID uint64 `json:"user_zcode_id,string"`
 	Username    string `json:"username"`
 	UserRole    string `json:"user_role"`
 }

@@ -10,23 +10,24 @@ import (
 type IAuthPermitRepo interface {
 	CreateRole(db *gorm.DB, role *entities.Role) error
 	UpdateRole(db *gorm.DB, role *entities.Role) error
-	DeleteRole(db *gorm.DB, roleID []uint) error
+	DeleteRole(db *gorm.DB, roleID uint) error
 	FindRoleByID(db *gorm.DB, roleID uint) (*entities.Role, error)
 	FindAllRoles(db *gorm.DB) ([]*entities.Role, error)
 
 	CreateAuthPoint(db *gorm.DB, authpoint *entities.AuthPoint) error
 	UpdateAuthPoint(db *gorm.DB, authpoint *entities.AuthPoint) error
-	DeleteAuthPoint(db *gorm.DB, authpointID []uint) error
+	DeleteAuthPoint(db *gorm.DB, authpointID uint) error
 	FindAuthPointByID(db *gorm.DB, authPointID uint) (*entities.AuthPoint, error)
 	FindAllAuthPoints(db *gorm.DB) ([]*entities.AuthPoint, error)
+	FindAuthPointByPermissionCode(db *gorm.DB, permissionCode string) (*entities.AuthPoint, error)
 
 	SetAuthPointToRole(db *gorm.DB, roleAuthpoint []*entities.RoleAuthPoint) error
-	DeleteAuthPointToRole(db *gorm.DB, roleAuthPointID []uint) error
+	DeleteAuthPointToRole(db *gorm.DB, roleAuthPointID uint) error
 	FindAuthPointsByRoleID(db *gorm.DB, RoleID uint) ([]*dto.RoleAuthPoints, error)
 	FindRoleIDsByAuthPointID(db *gorm.DB, AuthPointID []uint) ([]uint, error)
 
 	SetUserRoles(db *gorm.DB, userRole []*entities.UserRole) error
-	DeleteUserRoles(db *gorm.DB, userRoleID []uint) error
+	DeleteUserRoles(db *gorm.DB, userRoleID uint) error
 	FindUserRoleByID(db *gorm.DB, userRoleID uint) (*entities.UserRole, error)
 	FindUserRoleByUserID(db *gorm.DB, UserID uint) ([]*dto.UserRoles, error)
 }
@@ -52,8 +53,8 @@ func (a *AuthPermitRepo) UpdateRole(db *gorm.DB, role *entities.Role) error {
 	}
 	return nil
 }
-func (a *AuthPermitRepo) DeleteRole(db *gorm.DB, roleID []uint) error {
-	err := db.Where("id IN ?", roleID).Delete(&entities.Role{}).Error
+func (a *AuthPermitRepo) DeleteRole(db *gorm.DB, roleID uint) error {
+	err := db.Where("id = ?", roleID).Delete(&entities.Role{}).Error
 	return err
 }
 func (a *AuthPermitRepo) FindRoleByID(db *gorm.DB, roleID uint) (*entities.Role, error) {
@@ -87,8 +88,8 @@ func (a *AuthPermitRepo) UpdateAuthPoint(db *gorm.DB, authpoint *entities.AuthPo
 	}
 	return nil
 }
-func (a *AuthPermitRepo) DeleteAuthPoint(db *gorm.DB, authpointID []uint) error {
-	err := db.Where("id IN ?").Delete(&entities.AuthPoint{}).Error
+func (a *AuthPermitRepo) DeleteAuthPoint(db *gorm.DB, authpointID uint) error {
+	err := db.Where("id = ?", authpointID).Delete(&entities.AuthPoint{}).Error
 	if err != nil {
 		return err
 	}
@@ -110,6 +111,14 @@ func (a *AuthPermitRepo) FindAllAuthPoints(db *gorm.DB) ([]*entities.AuthPoint, 
 	}
 	return authpoints, nil
 }
+func (a *AuthPermitRepo) FindAuthPointByPermissionCode(db *gorm.DB, permissionCode string) (*entities.AuthPoint, error) {
+	var authpoint entities.AuthPoint
+	err := db.Where("permission_code=?", permissionCode).First(&authpoint).Error
+	if err != nil {
+		return nil, err
+	}
+	return &authpoint, nil
+}
 
 func (a *AuthPermitRepo) SetAuthPointToRole(db *gorm.DB, roleAuthpoint []*entities.RoleAuthPoint) error {
 	err := db.Clauses(clause.OnConflict{
@@ -121,8 +130,8 @@ func (a *AuthPermitRepo) SetAuthPointToRole(db *gorm.DB, roleAuthpoint []*entiti
 	}
 	return nil
 }
-func (a *AuthPermitRepo) DeleteAuthPointToRole(db *gorm.DB, roleAuthPointID []uint) error {
-	err := db.Where("ID IN ?", roleAuthPointID).Delete(&entities.RoleAuthPoint{}).Error
+func (a *AuthPermitRepo) DeleteAuthPointToRole(db *gorm.DB, roleAuthPointID uint) error {
+	err := db.Where("ID = ?", roleAuthPointID).Delete(&entities.RoleAuthPoint{}).Error
 	if err != nil {
 		return err
 	}
@@ -136,9 +145,9 @@ func (a *AuthPermitRepo) FindAuthPointsByRoleID(db *gorm.DB, RoleID uint) ([]*dt
 	    a.request_path,
 	    a.permission_code
 	FROM 
-	    roleauthpoint r
+	    role_auth_point r
 	JOIN 
-	    authpoint a ON r.auth_point_id = a.id
+	    auth_point a ON r.auth_point_id = a.id
 	WHERE 
 	    r.role_id = ?
 	`
@@ -163,8 +172,8 @@ func (a *AuthPermitRepo) SetUserRoles(db *gorm.DB, userRole []*entities.UserRole
 	}).Create(&userRole).Error
 	return err
 }
-func (a *AuthPermitRepo) DeleteUserRoles(db *gorm.DB, userRoleID []uint) error {
-	err := db.Where("id IN ?", userRoleID).Delete(&entities.UserRole{}).Error
+func (a *AuthPermitRepo) DeleteUserRoles(db *gorm.DB, userRoleID uint) error {
+	err := db.Where("id = ?", userRoleID).Delete(&entities.UserRole{}).Error
 	return err
 }
 
@@ -183,7 +192,7 @@ func (a *AuthPermitRepo) FindUserRoleByUserID(db *gorm.DB, UserID uint) ([]*dto.
         FROM 
             user_role ur
         JOIN 
-            role r ON ur.role_id = r.id
+            roles r ON ur.role_id = r.id
         WHERE 
             ur.user_id = ?
     `

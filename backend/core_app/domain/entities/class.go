@@ -9,7 +9,7 @@ type Class struct {
 	ClassName           string `gorm:"size:255" json:"class_name"`
 	ClassCode           string `gorm:"size:10;unique" json:"class_code"`
 	ClassDescription    string `gorm:"type:text" json:"class_description"`
-	ClassManagerZCodeID uint64 `json:"class_manager_zcode_id"`
+	ClassManagerZCodeID uint64 `json:"class_manager_zcode_id" gorm:"column:class_manager_zcode_id"`
 	ClassManagerName    string `json:"class_manager_name"`
 }
 
@@ -28,7 +28,7 @@ type ClassParticipants struct {
 	BaseEntity
 	ClassID     uint   `json:"class_id"`
 	ClassName   string `json:"class_name"`
-	UserZCodeID uint64 `json:"user_zcode_id"`
+	UserZCodeID uint64 `json:"user_zcode_id" gorm:"column:user_zcode_id"`
 	Username    string `json:"username"`
 	UserRole    string `json:"user_role"`
 }

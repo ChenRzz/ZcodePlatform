@@ -2,7 +2,8 @@ export interface CreateClassRequest {
     class_name: string;
     class_code: string;
     class_description: string;
-    class_manager_z_code_id: bigint;
+    class_manager_z_code_id: string;
+    class_manager_name:string;
 }
 
 export interface DeleteClassRequest {
@@ -14,7 +15,8 @@ export interface UpdateClassInfoRequest {
     class_name: string;
     class_code: string;
     class_description: string;
-    class_manager_z_code_id: bigint;
+    class_manager_z_code_id: string;
+    class_manager_name:string;
 }
 
 export interface FindClassByIDRequest {
@@ -31,7 +33,7 @@ export interface CreateLectureRequest {
     lecture_description: string;
     start_time: string | null; // ISO 格式时间字符串
     end_time: string | null;
-    lecturer_z_code_id: bigint;
+    lecturer_z_code_id: string;
 }
 
 export interface DeleteLectureRequest {
@@ -45,7 +47,7 @@ export interface UpdateLectureInfoRequest {
     lecture_description: string;
     start_time: string | null;
     end_time: string | null;
-    lecturer_z_code_id: bigint;
+    lecturer_z_code_id: string;
 }
 
 export interface FindLectureByIDRequest {
@@ -59,7 +61,7 @@ export interface FindLecturesByClassIDRequest {
 export interface AddParticipantToClassRequest {
     class_id: number;
     class_name: string;
-    user_zcode_id: bigint;
+    user_zcode_id: string;
     username: string;
     user_role: string;
 }
@@ -74,7 +76,7 @@ export interface SetRoleForParticipantRequest {
 }
 
 export interface FindClassByParticipantZCodeIDRequest {
-    user_zcode_id: bigint;
+    user_zcode_id: string;
 }
 
 export interface FindParticipantByClassIDRequest {

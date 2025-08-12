@@ -10,7 +10,7 @@ type ClassInfo struct {
 	ClassName           string     `json:"class_name"`
 	ClassCode           string     `json:"class_code"`
 	ClassDescription    string     `json:"class_description"`
-	ClassManagerZCodeID uint64     `json:"class_manager_z_code_id"`
+	ClassManagerZCodeID uint64     `json:"class_manager_zcode_id"`
 	ClassManagerName    string     `json:"class_manager_name"`
 }
 
@@ -37,7 +37,7 @@ type ClassParticipantInfo struct {
 type UserJoinedClassesInfo struct {
 	ClassParticipantID uint       `json:"class_participant_id"`
 	ClassID            uint       `json:"class_id"`
-	ClassName          uint       `json:"class_name"`
+	ClassName          string     `json:"class_name"`
 	ClassCode          string     `json:"class_code"`
 	ClassManagerName   string     `json:"class_manager_name"`
 	CreatedAt          *time.Time `json:"created_at"`

@@ -31,3 +31,7 @@ type UserinfoDTO struct {
 	UserEmail string `json:"user_email"`
 	UserZCode uint64 `json:"user_z_code"`
 }
+
+type FindByUserZCodeInputRequest struct {
+	UserZcodeID uint64 `json:"user_zcode_id,string"`
+}

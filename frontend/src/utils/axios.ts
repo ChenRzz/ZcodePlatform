@@ -23,11 +23,14 @@ instance.interceptors.response.use(
     (response) => response,
     (error) => {
         if (error.response?.status === 401) {
-            // token 过期或无效
             localStorage.removeItem("token");
             localStorage.removeItem("username");
             alert("login expired, please login");
             window.location.href = "/login";
+        }
+        if (error.response?.status === 405) {
+            alert("Insufficient permissions");
+            window.location.href = "/";
         }
         return Promise.reject(error);
     }

@@ -2,7 +2,7 @@
 
 export interface ClassInfo {
     class_id: number;
-    created_at: string | null; // 时间一般以字符串形式传输，可能为 null
+    created_at: string | null;
     class_name: string;
     class_code: string;
     class_description: string;

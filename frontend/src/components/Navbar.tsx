@@ -28,24 +28,20 @@ function Navbar() {
     return (
         <header className="bg-light shadow-sm py-3 px-4">
             <div className="d-flex justify-content-between align-items-center">
-                <div className="h4 text-primary">
+                {/* 左侧 Logo */}
+                <div className="h4 text-primary mb-0">
                     <Link to="/" className="text-primary text-decoration-none">
                         Zcode Platform
                     </Link>
                 </div>
-                <div className="d-flex align-items-center gap-4">
-                    <Link
-                        to="/myclasses"
-                        className="text-success text-decoration-none fs-5 fw-semibold"
-                    >
-                        📘 My Classes
-                    </Link>
 
-                   </div>
+
+
+                {/* 右侧用户信息/登录注册 */}
                 <nav className="d-flex gap-3 align-items-center">
                     {checkLoginStatus() ? (
                         <>
-                            <Link to="/userinfo" className="text-muted">
+                            <Link to="/userinfo" className="text-muted text-decoration-none">
                                 👤 {username}
                             </Link>
                             <button onClick={handleLogout} className="btn btn-outline-danger btn-sm">
@@ -54,8 +50,12 @@ function Navbar() {
                         </>
                     ) : (
                         <>
-                            <Link to="/login" className="btn btn-link text-primary">Login</Link>
-                            <Link to="/register" className="btn btn-link text-primary">Register</Link>
+                            <Link to="/login" className="btn btn-link text-primary">
+                                Login
+                            </Link>
+                            <Link to="/register" className="btn btn-link text-primary">
+                                Register
+                            </Link>
                         </>
                     )}
                 </nav>

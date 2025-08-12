@@ -14,6 +14,7 @@ type IClassHandler interface {
 	UpdateClassInfo(c *gin.Context)
 	FindClassByID(c *gin.Context)
 	FindClassByClassCode(c *gin.Context)
+	FindClassByManagerZCode(c *gin.Context)
 	FindAllClasses(c *gin.Context)
 
 	CreateLecture(c *gin.Context)
@@ -44,7 +45,7 @@ func (h *ClassHandler) CreateClass(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
-	err := h.ClassApplication.CreateClass(req.ClassName, req.ClassCode, req.ClassDescription, req.ClassManagerZCodeID)
+	err := h.ClassApplication.CreateClass(req.ClassName, req.ClassCode, req.ClassDescription, req.ClassManagerZCodeID, req.ClassManagerName)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
@@ -72,7 +73,7 @@ func (h *ClassHandler) UpdateClassInfo(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
-	err := h.ClassApplication.UpdateClassInfo(req.ClassID, req.ClassName, req.ClassCode, req.ClassDescription, req.ClassManagerZCodeID)
+	err := h.ClassApplication.UpdateClassInfo(req.ClassID, req.ClassName, req.ClassCode, req.ClassDescription, req.ClassManagerZCodeID, req.ClassManagerName)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
@@ -378,6 +379,37 @@ func (h *ClassHandler) FindUserClasses(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{
 		"message": "successfully find the classes",
 		"data":    userJoinedclasses,
+	})
+	return
+}
+
+func (h *ClassHandler) FindClassByManagerZCode(c *gin.Context) {
+	uZcode, exist := c.Get("Zcode")
+	if !exist {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Can not find User Zcode"})
+		return
+	}
+	userZcode := uZcode.(uint64)
+	classes, err := h.ClassApplication.FindClassByManagerZCode(userZcode)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+	var classesinfo []response.ClassInfo
+	for _, class := range classes {
+		var classinfo response.ClassInfo
+		classinfo.ClassID = class.ID
+		classinfo.ClassName = class.ClassName
+		classinfo.ClassCode = class.ClassCode
+		classinfo.ClassManagerName = class.ClassManagerName
+		classinfo.ClassManagerZCodeID = class.ClassManagerZCodeID
+		classinfo.CreatedAt = class.CreatedAt
+		classinfo.ClassDescription = class.ClassDescription
+		classesinfo = append(classesinfo, classinfo)
+	}
+	c.JSON(http.StatusOK, gin.H{
+		"message": "successfully get manager's classes",
+		"data":    classesinfo,
 	})
 	return
 }

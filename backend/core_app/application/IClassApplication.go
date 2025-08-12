@@ -10,11 +10,12 @@ import (
 )
 
 type IClassApplication interface {
-	CreateClass(className string, classCode string, classDescription string, classManagerZCodeID uint64) error
+	CreateClass(className string, classCode string, classDescription string, classManagerZCodeID uint64, classManagerName string) error
 	DeleteClass(classID uint) error
-	UpdateClassInfo(classID uint, className string, classCode string, classDescription string, classManagerZCodeID uint64) error
+	UpdateClassInfo(classID uint, className string, classCode string, classDescription string, classManagerZCodeID uint64, classManagerName string) error
 	FindClassByID(classID uint) (*entities.Class, error)
 	FindClassByClassCode(classCode string) (*entities.Class, error)
+	FindClassByManagerZCode(managerZode uint64) ([]*entities.Class, error)
 	FindAllClasses() ([]*entities.Class, error)
 
 	CreateLecture(ClassID uint, LectureName string, LectureDescription string, StartTime *time.Time, EndTime *time.Time, LecturerZCodeID uint64) error
@@ -41,11 +42,11 @@ func NewClassApplication(classService service.IClassService) *ClassApplication {
 	}
 }
 
-func (c *ClassApplication) CreateClass(className string, classCode string, classDescription string, classManagerZCodeID uint64) error {
+func (c *ClassApplication) CreateClass(className string, classCode string, classDescription string, classManagerZCodeID uint64, classManagerName string) error {
 	db := infrastructure.GetDB()
 	return db.Transaction(
 		func(tx *gorm.DB) error {
-			return c.ClassService.CreateClass(tx, className, classCode, classDescription, classManagerZCodeID)
+			return c.ClassService.CreateClass(tx, className, classCode, classDescription, classManagerZCodeID, classManagerName)
 		})
 }
 func (c *ClassApplication) DeleteClass(classID uint) error {
@@ -54,11 +55,11 @@ func (c *ClassApplication) DeleteClass(classID uint) error {
 		func(tx *gorm.DB) error { return c.ClassService.DeleteClass(tx, classID) })
 }
 
-func (c *ClassApplication) UpdateClassInfo(classID uint, className string, classCode string, classDescription string, classManagerZCodeID uint64) error {
+func (c *ClassApplication) UpdateClassInfo(classID uint, className string, classCode string, classDescription string, classManagerZCodeID uint64, classManagerName string) error {
 	db := infrastructure.GetDB()
 	return db.Transaction(
 		func(tx *gorm.DB) error {
-			return c.ClassService.UpdateClassInfo(tx, classID, className, classCode, classDescription, classManagerZCodeID)
+			return c.ClassService.UpdateClassInfo(tx, classID, className, classCode, classDescription, classManagerZCodeID, classManagerName)
 		})
 
 }
@@ -194,4 +195,9 @@ func (c *ClassApplication) FindAllClasses() ([]*entities.Class, error) {
 func (c *ClassApplication) FindUserClasses(participantZCodeID uint64) ([]*response.UserJoinedClassesInfo, error) {
 	db := infrastructure.GetDB()
 	return c.ClassService.FindUserClasses(db, participantZCodeID)
+}
+
+func (c *ClassApplication) FindClassByManagerZCode(managerZode uint64) ([]*entities.Class, error) {
+	db := infrastructure.GetDB()
+	return c.ClassService.FindClassByManagerZCode(db, managerZode)
 }
