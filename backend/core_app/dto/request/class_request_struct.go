@@ -37,6 +37,7 @@ type CreateLecture struct {
 	StartTime          *time.Time `json:"start_time"`
 	EndTime            *time.Time `json:"end_time"`
 	LecturerZCodeID    uint64     `json:"lecturer_z_code_id,string"`
+	LecturerName       string     `json:"lecturer_name"`
 }
 
 type DeleteLecture struct {
@@ -51,6 +52,7 @@ type UpdateLectureInfo struct {
 	StartTime          *time.Time `json:"start_time"`
 	EndTime            *time.Time `json:"end_time"`
 	LecturerZCodeID    uint64     `json:"lecturer_z_code_id,string"`
+	LecturerName       string     `json:"lecturer_name"`
 }
 
 type FindLectureByID struct {

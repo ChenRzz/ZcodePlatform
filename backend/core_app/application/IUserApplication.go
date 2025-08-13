@@ -6,6 +6,7 @@ import (
 	"MScProject/core_app/dto/request"
 	"MScProject/core_app/infrastructure"
 	"errors"
+	"fmt"
 	"gorm.io/gorm"
 )
 
@@ -30,7 +31,24 @@ func NewUserApplication(userService service.IUserService) *UserApplication {
 func (u *UserApplication) Register(username, password, email string) error {
 	db := infrastructure.GetDB()
 	err := db.Transaction(func(tx *gorm.DB) error {
-		return u.UserService.Register(tx, username, password, email)
+		err := u.UserService.Register(tx, username, password, email)
+		if err != nil {
+			return err
+		}
+		sql := `select id from users where username=?`
+		var userid uint
+		err = tx.Raw(sql, username).Scan(&userid).Error
+		if err != nil {
+			return err
+		}
+		sql = `INSERT INTO user_role (user_id, role_id, created_at, is_delete)
+		VALUES (?, ?, NOW(), 0)`
+		err = tx.Exec(sql, userid, 4).Error
+		if err != nil {
+			fmt.Println("添加角色失败:", err)
+			return err
+		}
+		return nil
 	})
 	return err
 }

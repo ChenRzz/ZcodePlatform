@@ -12,9 +12,8 @@ const AllClasses = () => {
     const [loading, setLoading] = useState<boolean>(true);
     const [error, setError] = useState<string | null>(null);
     const navigate = useNavigate();
-
-
-    const userRole = "student";
+    
+    const userRolehard = "student";
     const { username, userZcode } = useUser()
     useEffect(() => {
         const fetchData = async () => {
@@ -65,7 +64,7 @@ const AllClasses = () => {
             class_name: className,
             user_zcode_id: zcode,
             username: username,
-            user_role: userRole,
+            user_role: userRolehard,
         };
 
         try {

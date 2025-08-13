@@ -20,7 +20,7 @@ type Lecture struct {
 	ClassID            uint       `json:"class_id"`
 	StartTime          *time.Time `json:"start_time"`
 	EndTime            *time.Time `json:"end_time"`
-	LecturerZCodeID    uint64     `json:"lecturer_zcode_id"`
+	LecturerZCodeID    uint64     `json:"lecturer_zcode_id" gorm:"column:lecturer_zcode_id"`
 	LecturerName       string     `gorm:"size 255" json:"lecturer_name"`
 }
 

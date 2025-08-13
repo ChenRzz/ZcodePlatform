@@ -4,6 +4,8 @@ import (
 	"MScProject/authentication/token/base_Interface"
 	"MScProject/core_app/application"
 	"MScProject/core_app/dto/request"
+	"MScProject/core_app/infrastructure"
+	"fmt"
 	"github.com/gin-gonic/gin"
 	"net/http"
 	"strconv"
@@ -62,12 +64,24 @@ func (h *UserHandler) Login(c *gin.Context) {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
-
+	sql := `SELECT r.role_name
+FROM user_role ur
+JOIN roles r ON ur.role_id = r.id
+WHERE ur.user_id = ?`
+	var roleNames []string
+	db := infrastructure.GetDB()
+	err = db.Raw(sql, uid).Scan(&roleNames).Error
+	if err != nil {
+		fmt.Println("failed to get user's roles:", err)
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
 	c.JSON(http.StatusOK, gin.H{
 		"token":     tk,
 		"message":   "login success",
 		"username":  req.Username,
 		"userZcode": strconv.FormatUint(uzcode, 10),
+		"user_role": roleNames, //[]string
 	})
 }
 func (h *UserHandler) Logout(c *gin.Context) {

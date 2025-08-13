@@ -22,7 +22,7 @@ type LectureInfo struct {
 	ClassID            uint       `json:"class_id"`
 	StartTime          *time.Time `json:"start_time"`
 	EndTime            *time.Time `json:"end_time"`
-	LecturerZCodeID    uint64     `json:"lecturer_z_code_id"`
+	LecturerZCodeID    uint64     `json:"lecturer_z_code_id,string"`
 	LecturerName       string     `json:"lecturer_name"`
 }
 type ClassParticipantInfo struct {

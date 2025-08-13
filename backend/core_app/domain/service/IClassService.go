@@ -19,10 +19,10 @@ type IClassService interface {
 	FindAllClasses(db *gorm.DB) ([]*entities.Class, error)
 
 	CreateLecture(db *gorm.DB, ClassID uint, LectureName string, LectureDescription string,
-		StartTime *time.Time, EndTime *time.Time, LecturerZCodeID uint64) error
+		StartTime *time.Time, EndTime *time.Time, LecturerZCodeID uint64, LecturerName string) error
 	DeleteLecture(db *gorm.DB, LectureID uint) error
 	UpdateLectureInfo(db *gorm.DB, LectureID uint, ClassID uint, LectureName string, LectureDescription string,
-		StartTime *time.Time, EndTime *time.Time, LecturerZCodeID uint64) error
+		StartTime *time.Time, EndTime *time.Time, LecturerZCodeID uint64, LecturerName string) error
 	FindLectureByLectureID(db *gorm.DB, LectureID uint) (*entities.Lecture, error)
 	FindLecturesByClassID(db *gorm.DB, ClassID uint) ([]*entities.Lecture, error)
 
@@ -93,9 +93,9 @@ func (c *ClassService) FindClassByClassCode(db *gorm.DB, classCode string) (*ent
 }
 
 func (c *ClassService) CreateLecture(db *gorm.DB, ClassID uint, LectureName string, LectureDescription string,
-	StartTime *time.Time, EndTime *time.Time, LecturerZCodeID uint64) error {
+	StartTime *time.Time, EndTime *time.Time, LecturerZCodeID uint64, LecturerName string) error {
 	var lecture = entities.Lecture{ClassID: ClassID, LectureName: LectureName, LectureDescription: LectureDescription,
-		StartTime: StartTime, EndTime: EndTime, LecturerZCodeID: LecturerZCodeID}
+		StartTime: StartTime, EndTime: EndTime, LecturerZCodeID: LecturerZCodeID, LecturerName: LecturerName}
 	err := c.ClassRepo.CreateLecture(db, &lecture)
 	if err != nil {
 		return err
@@ -110,7 +110,7 @@ func (c *ClassService) DeleteLecture(db *gorm.DB, LectureID uint) error {
 	return nil
 }
 func (c *ClassService) UpdateLectureInfo(db *gorm.DB, LectrueID uint, ClassID uint, LectureName string, LectureDescription string,
-	StartTime *time.Time, EndTime *time.Time, LecturerZCodeID uint64) error {
+	StartTime *time.Time, EndTime *time.Time, LecturerZCodeID uint64, LecturerName string) error {
 	lecture, err := c.ClassRepo.FindLectureByLectureID(db, LectrueID)
 	if err != nil {
 		return nil
@@ -121,6 +121,7 @@ func (c *ClassService) UpdateLectureInfo(db *gorm.DB, LectrueID uint, ClassID ui
 	lecture.StartTime = StartTime
 	lecture.EndTime = EndTime
 	lecture.LecturerZCodeID = LecturerZCodeID
+	lecture.LecturerName = LecturerName
 	err = c.ClassRepo.UpdateLecture(db, lecture)
 	if err != nil {
 		return err

@@ -18,9 +18,9 @@ type IClassApplication interface {
 	FindClassByManagerZCode(managerZode uint64) ([]*entities.Class, error)
 	FindAllClasses() ([]*entities.Class, error)
 
-	CreateLecture(ClassID uint, LectureName string, LectureDescription string, StartTime *time.Time, EndTime *time.Time, LecturerZCodeID uint64) error
+	CreateLecture(ClassID uint, LectureName string, LectureDescription string, StartTime *time.Time, EndTime *time.Time, LecturerZCodeID uint64, LecturerName string) error
 	DeleteLecture(LectureID uint) error
-	UpdateLectureInfo(LectureID uint, ClassID uint, LectureName string, LectureDescription string, StartTime *time.Time, EndTime *time.Time, LecturerZCodeID uint64) error
+	UpdateLectureInfo(LectureID uint, ClassID uint, LectureName string, LectureDescription string, StartTime *time.Time, EndTime *time.Time, LecturerZCodeID uint64, LecturerName string) error
 	FindLectureByLectureID(LectureID uint) (*entities.Lecture, error)
 	FindLecturesByClassID(ClassID uint) ([]*entities.Lecture, error)
 
@@ -91,10 +91,10 @@ func (c *ClassApplication) FindClassByClassCode(classCode string) (*entities.Cla
 	return class, nil
 }
 
-func (c *ClassApplication) CreateLecture(ClassID uint, LectureName string, LectureDescription string, StartTime *time.Time, EndTime *time.Time, LecturerZCodeID uint64) error {
+func (c *ClassApplication) CreateLecture(ClassID uint, LectureName string, LectureDescription string, StartTime *time.Time, EndTime *time.Time, LecturerZCodeID uint64, LecturerName string) error {
 	db := infrastructure.GetDB()
 	err := db.Transaction(func(tx *gorm.DB) error {
-		return c.ClassService.CreateLecture(tx, ClassID, LectureName, LectureDescription, StartTime, EndTime, LecturerZCodeID)
+		return c.ClassService.CreateLecture(tx, ClassID, LectureName, LectureDescription, StartTime, EndTime, LecturerZCodeID, LecturerName)
 	})
 	return err
 }
@@ -105,10 +105,10 @@ func (c *ClassApplication) DeleteLecture(LectureID uint) error {
 	})
 	return err
 }
-func (c *ClassApplication) UpdateLectureInfo(LectureID uint, ClassID uint, LectureName string, LectureDescription string, StartTime *time.Time, EndTime *time.Time, LecturerZCodeID uint64) error {
+func (c *ClassApplication) UpdateLectureInfo(LectureID uint, ClassID uint, LectureName string, LectureDescription string, StartTime *time.Time, EndTime *time.Time, LecturerZCodeID uint64, LecturerName string) error {
 	db := infrastructure.GetDB()
 	err := db.Transaction(func(tx *gorm.DB) error {
-		return c.ClassService.UpdateLectureInfo(tx, LectureID, ClassID, LectureName, LectureDescription, StartTime, EndTime, LecturerZCodeID)
+		return c.ClassService.UpdateLectureInfo(tx, LectureID, ClassID, LectureName, LectureDescription, StartTime, EndTime, LecturerZCodeID, LecturerName)
 	})
 	return err
 }

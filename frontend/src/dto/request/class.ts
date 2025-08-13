@@ -27,36 +27,9 @@ export interface FindClassByClassCodeRequest {
     class_code: string;
 }
 
-export interface CreateLectureRequest {
-    class_id: number;
-    lecture_name: string;
-    lecture_description: string;
-    start_time: string | null; // ISO 格式时间字符串
-    end_time: string | null;
-    lecturer_z_code_id: string;
-}
 
-export interface DeleteLectureRequest {
-    lecture_id: number;
-}
 
-export interface UpdateLectureInfoRequest {
-    lecture_id: number;
-    class_id: number;
-    lecture_name: string;
-    lecture_description: string;
-    start_time: string | null;
-    end_time: string | null;
-    lecturer_z_code_id: string;
-}
 
-export interface FindLectureByIDRequest {
-    lecture_id: number;
-}
-
-export interface FindLecturesByClassIDRequest {
-    class_id: number;
-}
 
 export interface AddParticipantToClassRequest {
     class_id: number;
@@ -81,4 +54,39 @@ export interface FindClassByParticipantZCodeIDRequest {
 
 export interface FindParticipantByClassIDRequest {
     class_id: number;
+}
+
+export interface getClassByIDRequest{
+    class_id:number;
+}
+
+
+
+export interface CreateLectureRequest {
+    class_id: number;
+    lecture_name:string;
+    lecture_description:string;
+    start_time:string | null;
+    end_time:string | null;
+    lecturer_z_code_id:string;
+    lecturer_name:string;
+}
+
+export interface DeleteLectureRequest {
+    lecture_id: number;
+}
+
+export interface UpdateLectureRequest {
+    lecture_id:number;
+    class_id: number;
+    lecture_name:string;
+    lecture_description:string;
+    start_time:string | null;
+    end_time:string | null;
+    lecturer_z_code_id:string;
+    lecturer_name:string;
+}
+
+export interface getLecturesByClassIDRequest {
+    class_id:number;
 }

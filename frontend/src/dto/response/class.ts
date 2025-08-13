@@ -10,6 +10,7 @@ export interface ClassInfo {
     class_manager_name: string;
 }
 
+
 export interface LectureInfo {
     lecture_id: number;
     created_at: string | null;
@@ -18,7 +19,7 @@ export interface LectureInfo {
     class_id: number;
     start_time: string | null;
     end_time: string | null;
-    lecturer_zcode_id: bigint;
+    lecturer_z_code_id: string;
     lecturer_name: string;
 }
 

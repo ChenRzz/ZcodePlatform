@@ -4,6 +4,7 @@ import (
 	"MScProject/core_app/application"
 	"MScProject/core_app/dto/request"
 	"MScProject/core_app/dto/response"
+	"fmt"
 	"github.com/gin-gonic/gin"
 	"net/http"
 )
@@ -136,7 +137,8 @@ func (h *ClassHandler) CreateLecture(c *gin.Context) {
 	if err := c.ShouldBind(&req); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 	}
-	err := h.ClassApplication.CreateLecture(req.ClassID, req.LectureName, req.LectureDescription, req.StartTime, req.EndTime, req.LecturerZCodeID)
+	fmt.Println(req)
+	err := h.ClassApplication.CreateLecture(req.ClassID, req.LectureName, req.LectureDescription, req.StartTime, req.EndTime, req.LecturerZCodeID, req.LecturerName)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
@@ -163,7 +165,7 @@ func (h *ClassHandler) UpdateLectureInfo(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
-	err := h.ClassApplication.UpdateLectureInfo(req.LectureID, req.ClassID, req.LectureName, req.LectureDescription, req.StartTime, req.EndTime, req.LecturerZCodeID)
+	err := h.ClassApplication.UpdateLectureInfo(req.LectureID, req.ClassID, req.LectureName, req.LectureDescription, req.StartTime, req.EndTime, req.LecturerZCodeID, req.LecturerName)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return

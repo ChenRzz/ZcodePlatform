@@ -4,7 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import { useUser } from '../../context/UserContext';
 const Login = () => {
     const navigate = useNavigate();
-    const {setUsername,setUserZcode} = useUser();
+    const {setUsername,setUserZcode,setRoles} = useUser();
     const [usernameinput, setUsernameInput] = useState('');
     const [password, setPassword] = useState('');
     const [message, setMessage] = useState('');
@@ -15,13 +15,16 @@ const Login = () => {
             const token = response.token;
             const backendUsername = response.username;
             const backendUserZcode=response.userZcode;
+            const roleNames: string[] = response.user_role;
 
             localStorage.setItem('token', token);
             localStorage.setItem('username', backendUsername);
             localStorage.setItem('userZcode', backendUserZcode.toString());
+            localStorage.setItem('user_roles', JSON.stringify(roleNames));
 
             setUsername(backendUsername);
             setUserZcode(backendUserZcode);
+            setRoles(roleNames);
             setMessage('🎉 Login successful!');
             setTimeout(() => navigate('/'), 1500); // 登录成功后跳转首页
         } catch (error: any) {

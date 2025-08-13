@@ -2,8 +2,10 @@ import { useEffect, useState } from "react";
 import { getManagedClasses, createClass, updateClass, deleteClass } from "../../services/class";
 import type { CreateClassRequest, UpdateClassInfoRequest, DeleteClassRequest } from "../../dto/request/class.ts";
 import type { ClassInfo } from "../../dto/response/class.ts";
+import { useNavigate } from "react-router-dom";
 
 const ManageMyClasses = () => {
+    const navigate = useNavigate();
     const [classes, setClasses] = useState<ClassInfo[]>([]);
     const [newClass, setNewClass] = useState<CreateClassRequest>({
         class_name: "",
@@ -167,7 +169,10 @@ const ManageMyClasses = () => {
                 <div className="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4">
                     {classes.map((cls) => (
                         <div className="col" key={cls.class_id}>
-                            <div className="card shadow-sm h-100">
+                            <div className="card shadow-sm h-100"
+                                 style={{ cursor: "pointer" }}
+                                 onClick={() => navigate(`/class/class_management/${cls.class_id}`)}
+                            >
                                 <div className="card-body">
                                     <h5 className="card-title">{cls.class_name}</h5>
                                     <p className="card-text">{cls.class_description}</p>

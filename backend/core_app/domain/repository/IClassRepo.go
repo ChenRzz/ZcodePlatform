@@ -118,7 +118,7 @@ func (c *ClassRepo) FindLectureByLectureID(db *gorm.DB, lectureID uint) (*entiti
 
 func (c *ClassRepo) FindLectureByClassID(db *gorm.DB, classID uint) ([]*entities.Lecture, error) {
 	var lectures []*entities.Lecture
-	err := db.Where("ClassID=?", classID).Find(&lectures).Error
+	err := db.Where("class_id=?", classID).Find(&lectures).Error
 	if err != nil {
 		return nil, errors.New("Database:failed to find lecture")
 	}
