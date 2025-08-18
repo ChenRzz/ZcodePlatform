@@ -38,6 +38,7 @@ var (
 func InitALl() {
 	infrastructure.InitRedis()
 	infrastructure.SetupDatabase()
+
 	Authtokens = jwt.NewJwtManagement()
 	RbacService = rbac.NewAuthenticationService(infrastructure.RedisClient)
 	AuthMiddleWares = middleware.NewAuthMiddleWare(Authtokens, RbacService)

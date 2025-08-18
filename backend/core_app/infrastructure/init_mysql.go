@@ -32,7 +32,7 @@ func InitSchema(db *gorm.DB) {
 		db.Migrator().HasTable("auth_point") && db.Migrator().HasTable("user_role") &&
 		db.Migrator().HasTable("role_auth_point") && db.Migrator().HasTable("classes") &&
 		db.Migrator().HasTable("lectures") && db.Migrator().HasTable("class_participants") {
-		fmt.Println("数据库已初始化，跳过建表")
+		fmt.Println("database init successful，skip executing schema")
 		return
 	}
 	content, err := os.ReadFile("sql/schema.sql")

@@ -12,8 +12,6 @@ interface UserInfo {
 function UserInfo() {
     const [userInfo, setUserInfo] = useState<UserInfo | null>(null);
     const navigate = useNavigate();
-
-    // 获取用户信息
     const fetchUserInfo = async () => {
         try {
             const data = await getUserInfo();
@@ -23,13 +21,12 @@ function UserInfo() {
         }
     };
 
-    // 重设密码
     const handleChangePassword = async () => {
         const oldPassword = prompt("Enter your current password:");
         const newPassword = prompt("Enter your new password:");
         if (oldPassword && newPassword) {
             try {
-                await changePassword(oldPassword, newPassword); // 调用修改密码的 API
+                await changePassword(oldPassword, newPassword);
                 alert("Password changed successfully");
                 await logoutUser();
                 navigate("/login")
@@ -43,15 +40,14 @@ function UserInfo() {
         }
     };
 
-    // 注销
     const handleLogoff = async () => {
         const password = prompt("Enter your current password:");
         if (password) {
             try {
                 await logoffUser(password);
                 alert("Log off successfully!");
-                localStorage.removeItem("token"); // 清除 token
-                navigate("/"); // 重定向到首页
+                localStorage.removeItem("token");
+                navigate("/");
             } catch (error) {
                 console.error("Error logging off:", error);
                 alert("Failed to log off");

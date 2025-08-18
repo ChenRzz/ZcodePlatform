@@ -5,16 +5,15 @@ import type {AuthPointInfo} from "../../dto/response/auth.ts";
 import { Modal, Button, Form } from "react-bootstrap";
 
 const AuthPointManagementPage = () => {
-    const [authPoints, setAuthPoints] = useState<AuthPointInfo[]>([]); // AuthPoint 列表
-    const [showModal, setShowModal] = useState(false); // 控制模态框显示与隐藏
-    const [currentAuthPoint, setCurrentAuthPoint] = useState<AuthPointInfo | null>(null); // 当前编辑的 AuthPoint
-    const [requestMethod, setRequestMethod] = useState(""); // 请求方法
-    const [requestPath, setRequestPath] = useState(""); // 请求路径
-    const [permissionCode, setPermissionCode] = useState(""); // 权限码
-    const [isEditing, setIsEditing] = useState(false); // 是否为编辑模式
-    const [searchPermissionCode, setSearchPermissionCode] = useState(""); // 搜索框中的权限码
+    const [authPoints, setAuthPoints] = useState<AuthPointInfo[]>([]);
+    const [showModal, setShowModal] = useState(false);
+    const [currentAuthPoint, setCurrentAuthPoint] = useState<AuthPointInfo | null>(null);
+    const [requestMethod, setRequestMethod] = useState("");
+    const [requestPath, setRequestPath] = useState("");
+    const [permissionCode, setPermissionCode] = useState("");
+    const [isEditing, setIsEditing] = useState(false);
+    const [searchPermissionCode, setSearchPermissionCode] = useState("");
 
-    // 获取所有 AuthPoints 数据
     useEffect(() => {
         const fetchAuthPoints = async () => {
             try {
@@ -27,25 +26,24 @@ const AuthPointManagementPage = () => {
         fetchAuthPoints();
     }, []);
 
-    // 打开模态框，准备创建或更新 AuthPoint
     const handleShowModal = (authPoint?: AuthPointInfo) => {
         if (authPoint) {
             setRequestMethod(authPoint.request_method);
             setRequestPath(authPoint.request_path);
             setPermissionCode(authPoint.permission_code);
             setCurrentAuthPoint(authPoint);
-            setIsEditing(true);  // 进入编辑模式
+            setIsEditing(true);
         } else {
             setRequestMethod("");
             setRequestPath("");
             setPermissionCode("");
             setCurrentAuthPoint(null);
-            setIsEditing(false);  // 进入创建模式
+            setIsEditing(false);
         }
         setShowModal(true);
     };
 
-    // 关闭模态框并清空数据
+
     const handleCloseModal = () => {
         setShowModal(false);
         setRequestMethod("");
@@ -53,7 +51,6 @@ const AuthPointManagementPage = () => {
         setPermissionCode("");
     };
 
-    // 创建 AuthPoint
     const handleCreateAuthPoint = async () => {
         try {
             const newAuthPoint: CreateAuthPointRequest = {
@@ -79,7 +76,6 @@ const AuthPointManagementPage = () => {
         }
     };
 
-    // 更新 AuthPoint
     const handleUpdateAuthPoint = async () => {
         if (currentAuthPoint) {
             try {
@@ -122,7 +118,6 @@ const AuthPointManagementPage = () => {
         }
     };
 
-    // 搜索 AuthPoint
     const handleSearchAuthPoint = async () => {
         if (!searchPermissionCode) {
             alert("Please enter a permission code.");
@@ -142,7 +137,7 @@ const AuthPointManagementPage = () => {
         <div className="container mt-5">
             <h1 className="mb-4">AuthPoint Management</h1>
 
-            {/* 搜索框 */}
+            {/* search */}
             <Form className="mb-4 d-flex">
                 <Form.Control
                     type="text"
@@ -155,12 +150,12 @@ const AuthPointManagementPage = () => {
                 </Button>
             </Form>
 
-            {/* 创建按钮 */}
+            {/* Create */}
             <Button variant="primary" onClick={() => handleShowModal()}>
                 Create AuthPoint
             </Button>
 
-            {/* AuthPoint 列表 */}
+            {/* AuthPoint List */}
             <div className="mt-4">
                 <table className="table table-bordered">
                     <thead>
@@ -240,7 +235,7 @@ const AuthPointManagementPage = () => {
                     </Button>
                     <Button
                         variant="primary"
-                        onClick={isEditing ? handleUpdateAuthPoint : handleCreateAuthPoint} // 根据是否编辑来决定调用哪个函数
+                        onClick={isEditing ? handleUpdateAuthPoint : handleCreateAuthPoint}
                     >
                         {isEditing ? "Update" : "Create"}
                     </Button>

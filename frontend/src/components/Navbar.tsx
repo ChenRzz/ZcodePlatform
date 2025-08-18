@@ -3,10 +3,8 @@ import { useUser } from "../context/UserContext";
 import { logoutUser } from "../services/user";
 
 function Navbar() {
-    const { username, setUsername } = useUser(); // 使用 UserContext
+    const { username, setUsername } = useUser();
     const navigate = useNavigate();
-
-    // 检查 token 和 username 来判断是否已登录
     const checkLoginStatus = () => {
         const token = localStorage.getItem("token");
         return token && username;
@@ -14,7 +12,7 @@ function Navbar() {
 
     const handleLogout = async () => {
         try {
-            await logoutUser(); // 调用注销的 API
+            await logoutUser();
             alert("Logged out successfully!");
         } catch (err) {
             console.warn("Logout failed:", err);

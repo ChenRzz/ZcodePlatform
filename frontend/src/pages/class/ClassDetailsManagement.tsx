@@ -27,20 +27,62 @@ const ClassManagement = () => {
 
     const [editingLecture, setEditingLecture] = useState<LectureInfo | null>(null);
 
-    // 转成 datetime-local 格式字符串，方便输入框显示
-    const toDatetimeLocal = (value: string | null | undefined) => {
+    const toDatetimeLocal = (value: string | null | undefined): string => {
         if (!value) return "";
-        return value.length >= 16 ? value.substring(0, 16) : value;
+        try {
+            const date = new Date(value);
+            if (isNaN(date.getTime())) return "";
+
+            const year = date.getFullYear();
+            const month = (date.getMonth() + 1).toString().padStart(2, '0');
+            const day = date.getDate().toString().padStart(2, '0');
+            const hours = date.getHours().toString().padStart(2, '0');
+            const minutes = date.getMinutes().toString().padStart(2, '0');
+
+            return `${year}-${month}-${day}T${hours}:${minutes}`;
+        } catch (error) {
+            console.error('Error converting to datetime-local:', error);
+            return "";
+        }
     };
 
-    // 格式化时间字符串，发送给后台用（补足秒和时区Z）
+    const formatDisplayTime = (value: string | null): string => {
+        if (!value) return "N/A";
+        try {
+            const date = new Date(value);
+            if (isNaN(date.getTime())) return "N/A";
+
+            return date.toLocaleString('zh-CN', {
+                year: 'numeric',
+                month: '2-digit',
+                day: '2-digit',
+                hour: '2-digit',
+                minute: '2-digit',
+                hour12: false
+            });
+        } catch (error) {
+            console.error('Error formatting display time:', error);
+            return "N/A";
+        }
+    };
+
     const formatDateTime = (value: string | null) => {
         if (!value) return null;
-        let datetime = value;
-        if (!datetime.endsWith(':00')) {
-            datetime += ':00';
+        try {
+            if (value.includes('T') && !value.includes('Z')) {
+                const localDate = new Date(value);
+                if (isNaN(localDate.getTime())) return null;
+                return localDate.toISOString();
+            }
+
+            const date = new Date(value);
+            if (isNaN(date.getTime())) return null;
+
+            return date.toISOString();
+        } catch (error) {
+            console.error('Error formatting datetime:', error);
+            return null;
         }
-        return datetime + 'Z';
     };
 
     useEffect(() => {
@@ -64,11 +106,15 @@ const ClassManagement = () => {
 
     const handleCreateLecture = async () => {
         try {
-            await createLecture({
+            const lectureData = {
                 ...newLecture,
                 start_time: formatDateTime(newLecture.start_time),
                 end_time: formatDateTime(newLecture.end_time)
-            });
+            };
+
+            console.log('Creating lecture with data:', lectureData);
+
+            await createLecture(lectureData);
             if (classId) {
                 const lecturesData = await getLecturesByClassID({ class_id: parseInt(classId) });
                 setLectures(lecturesData || []);
@@ -90,6 +136,10 @@ const ClassManagement = () => {
     };
 
     const handleDeleteLecture = async (lectureId: number) => {
+        if (!confirm('Are you sure you want to delete this lecture?')) {
+            return;
+        }
+
         try {
             const deleteRequest: DeleteLectureRequest = { lecture_id: lectureId };
             await deleteLecture(deleteRequest);
@@ -113,6 +163,9 @@ const ClassManagement = () => {
                 lecturer_z_code_id: editingLecture.lecturer_z_code_id,
                 lecturer_name: editingLecture.lecturer_name
             };
+
+            console.log('Updating lecture with data:', updateRequest);
+
             const updatedLecture = await updateLecture(updateRequest);
             setLectures(lectures.map(lecture => lecture.lecture_id === updatedLecture.lecture_id ? updatedLecture : lecture));
             setEditingLecture(null);
@@ -124,6 +177,10 @@ const ClassManagement = () => {
 
     const handleEditLecture = (lecture: LectureInfo) => {
         setEditingLecture({ ...lecture });
+    };
+
+    const handleEnterClassroom = (lectureId: number, lecturerZcode:string) => {
+        navigate(`/classroom/${lectureId}/${lecturerZcode}`);
     };
 
     if (loading) {
@@ -185,7 +242,7 @@ const ClassManagement = () => {
                             <h1 className="card-title h4 mb-0">{classInfo.class_name}</h1>
                             <p className="text-muted small">Class Code: {classInfo.class_code}</p>
                             <p className="text-muted small">Manager: {classInfo.class_manager_name}</p>
-                            <p className="text-muted small">{classInfo.created_at}</p>
+                            <p className="text-muted small">{formatDisplayTime(classInfo.created_at)}</p>
                         </div>
                     </div>
 
@@ -200,37 +257,71 @@ const ClassManagement = () => {
                             <div className="card-body">
                                 <h6 className="fw-bold">Create New Lecture</h6>
                                 <div>
-                                    <input type="text" className="form-control mb-2" placeholder="Lecture Name"
-                                           value={newLecture.lecture_name}
-                                           onChange={(e) => setNewLecture({ ...newLecture, lecture_name: e.target.value })}
-                                    />
-                                    <textarea className="form-control mb-2" placeholder="Lecture Description"
-                                              value={newLecture.lecture_description}
-                                              onChange={(e) => setNewLecture({ ...newLecture, lecture_description: e.target.value })}
-                                    />
-                                    <input
-                                        type="datetime-local"
-                                        className="form-control mb-2"
-                                        value={toDatetimeLocal(newLecture.start_time)}
-                                        onChange={(e) => setNewLecture({ ...newLecture, start_time: e.target.value })}
-                                    />
-                                    <input
-                                        type="datetime-local"
-                                        className="form-control mb-2"
-                                        value={toDatetimeLocal(newLecture.end_time)}
-                                        onChange={(e) => setNewLecture({ ...newLecture, end_time: e.target.value })}
-                                    />
-                                    <input type="text" className="form-control mb-2" placeholder="Lecturer ZCode"
-                                           value={newLecture.lecturer_z_code_id}
-                                           onChange={(e) => setNewLecture({ ...newLecture, lecturer_z_code_id: e.target.value })}
-                                    />
-                                    <input type="text" className="form-control mb-2" placeholder="Lecturer Name"
-                                           value={newLecture.lecturer_name}
-                                           onChange={(e) => setNewLecture({ ...newLecture, lecturer_name: e.target.value })}
-                                    />
-                                    <button onClick={handleCreateLecture} className="btn btn-primary mt-2">
-                                        Create Lecture
-                                    </button>
+                                    <div className="mb-2">
+                                        <label className="form-label small">Lecture Name</label>
+                                        <input
+                                            type="text"
+                                            className="form-control"
+                                            placeholder="Enter lecture name"
+                                            value={newLecture.lecture_name}
+                                            onChange={(e) => setNewLecture({ ...newLecture, lecture_name: e.target.value })}
+                                        />
+                                    </div>
+                                    <div className="mb-2">
+                                        <label className="form-label small">Lecture Description</label>
+                                        <textarea
+                                            className="form-control"
+                                            placeholder="Enter lecture description"
+                                            value={newLecture.lecture_description}
+                                            onChange={(e) => setNewLecture({ ...newLecture, lecture_description: e.target.value })}
+                                        />
+                                    </div>
+                                    <div className="mb-2">
+                                        <label className="form-label small">Start Time</label>
+                                        <input
+                                            type="datetime-local"
+                                            className="form-control"
+                                            value={toDatetimeLocal(newLecture.start_time)}
+                                            onChange={(e) => setNewLecture({ ...newLecture, start_time: e.target.value })}
+                                        />
+                                    </div>
+                                    <div className="mb-2">
+                                        <label className="form-label small">End Time</label>
+                                        <input
+                                            type="datetime-local"
+                                            className="form-control"
+                                            value={toDatetimeLocal(newLecture.end_time)}
+                                            onChange={(e) => setNewLecture({ ...newLecture, end_time: e.target.value })}
+                                        />
+                                    </div>
+                                    <div className="mb-2">
+                                        <label className="form-label small">Lecturer ZCode</label>
+                                        <input
+                                            type="text"
+                                            className="form-control"
+                                            placeholder="Enter lecturer Z code"
+                                            value={newLecture.lecturer_z_code_id}
+                                            onChange={(e) => setNewLecture({ ...newLecture, lecturer_z_code_id: e.target.value })}
+                                        />
+                                    </div>
+                                    <div className="mb-2">
+                                        <label className="form-label small">Lecturer Name</label>
+                                        <input
+                                            type="text"
+                                            className="form-control"
+                                            placeholder="Enter lecturer name"
+                                            value={newLecture.lecturer_name}
+                                            onChange={(e) => setNewLecture({ ...newLecture, lecturer_name: e.target.value })}
+                                        />
+                                    </div>
+                                    <div className="d-flex gap-2 mt-3">
+                                        <button onClick={handleCreateLecture} className="btn btn-primary">
+                                            Create Lecture
+                                        </button>
+                                        <button onClick={() => setIsCreating(false)} className="btn btn-secondary">
+                                            Cancel
+                                        </button>
+                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -242,40 +333,71 @@ const ClassManagement = () => {
                             <div className="card-body">
                                 <h6 className="fw-bold">Edit Lecture</h6>
                                 <div>
-                                    <input type="text" className="form-control mb-2" placeholder="Lecture Name"
-                                           value={editingLecture.lecture_name}
-                                           onChange={(e) => setEditingLecture({ ...editingLecture, lecture_name: e.target.value })}
-                                    />
-                                    <textarea className="form-control mb-2" placeholder="Lecture Description"
-                                              value={editingLecture.lecture_description}
-                                              onChange={(e) => setEditingLecture({ ...editingLecture, lecture_description: e.target.value })}
-                                    />
-                                    <input
-                                        type="datetime-local"
-                                        className="form-control mb-2"
-                                        value={toDatetimeLocal(editingLecture.start_time)}
-                                        onChange={(e) => setEditingLecture({ ...editingLecture, start_time: e.target.value })}
-                                    />
-                                    <input
-                                        type="datetime-local"
-                                        className="form-control mb-2"
-                                        value={toDatetimeLocal(editingLecture.end_time)}
-                                        onChange={(e) => setEditingLecture({ ...editingLecture, end_time: e.target.value })}
-                                    />
-                                    <input type="text" className="form-control mb-2" placeholder="Lecturer ZCode"
-                                           value={editingLecture.lecturer_z_code_id}
-                                           onChange={(e) => setEditingLecture({ ...editingLecture, lecturer_z_code_id: e.target.value })}
-                                    />
-                                    <input type="text" className="form-control mb-2" placeholder="Lecturer Name"
-                                           value={editingLecture.lecturer_name}
-                                           onChange={(e) => setEditingLecture({ ...editingLecture, lecturer_name: e.target.value })}
-                                    />
-                                    <button onClick={handleUpdateLecture} className="btn btn-primary mt-2 me-2">
-                                        Update Lecture
-                                    </button>
-                                    <button onClick={() => setEditingLecture(null)} className="btn btn-secondary mt-2">
-                                        Cancel
-                                    </button>
+                                    <div className="mb-2">
+                                        <label className="form-label small">Lecture Name</label>
+                                        <input
+                                            type="text"
+                                            className="form-control"
+                                            placeholder="Enter lecture name"
+                                            value={editingLecture.lecture_name}
+                                            onChange={(e) => setEditingLecture({ ...editingLecture, lecture_name: e.target.value })}
+                                        />
+                                    </div>
+                                    <div className="mb-2">
+                                        <label className="form-label small">Lecture Description</label>
+                                        <textarea
+                                            className="form-control"
+                                            placeholder="Enter lecture description"
+                                            value={editingLecture.lecture_description}
+                                            onChange={(e) => setEditingLecture({ ...editingLecture, lecture_description: e.target.value })}
+                                        />
+                                    </div>
+                                    <div className="mb-2">
+                                        <label className="form-label small">Start Time</label>
+                                        <input
+                                            type="datetime-local"
+                                            className="form-control"
+                                            value={toDatetimeLocal(editingLecture.start_time)}
+                                            onChange={(e) => setEditingLecture({ ...editingLecture, start_time: e.target.value })}
+                                        />
+                                    </div>
+                                    <div className="mb-2">
+                                        <label className="form-label small">End Time</label>
+                                        <input
+                                            type="datetime-local"
+                                            className="form-control"
+                                            value={toDatetimeLocal(editingLecture.end_time)}
+                                            onChange={(e) => setEditingLecture({ ...editingLecture, end_time: e.target.value })}
+                                        />
+                                    </div>
+                                    <div className="mb-2">
+                                        <label className="form-label small">Lecturer ZCode</label>
+                                        <input
+                                            type="text"
+                                            className="form-control"
+                                            placeholder="Enter lecturer Z code"
+                                            value={editingLecture.lecturer_z_code_id}
+                                            onChange={(e) => setEditingLecture({ ...editingLecture, lecturer_z_code_id: e.target.value })}
+                                        />
+                                    </div>
+                                    <div className="mb-2">
+                                        <label className="form-label small">Lecturer Name</label>
+                                        <input
+                                            type="text"
+                                            className="form-control"
+                                            placeholder="Enter lecturer name"
+                                            value={editingLecture.lecturer_name}
+                                            onChange={(e) => setEditingLecture({ ...editingLecture, lecturer_name: e.target.value })}
+                                        />
+                                    </div>
+                                    <div className="d-flex gap-2 mt-3">
+                                        <button onClick={handleUpdateLecture} className="btn btn-primary">
+                                            Update Lecture
+                                        </button>
+                                        <button onClick={() => setEditingLecture(null)} className="btn btn-secondary">
+                                            Cancel
+                                        </button>
+                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -302,17 +424,24 @@ const ClassManagement = () => {
                                                     <h6 className="fw-bold mb-2">{lecture.lecture_name}</h6>
                                                     <p className="text-muted small mb-2">{lecture.lecture_description}</p>
                                                     <p className="text-muted small mb-1">
-                                                        Start: {lecture.start_time ? new Date(lecture.start_time).toLocaleString() : "N/A"}
+                                                        <strong>Start:</strong> {formatDisplayTime(lecture.start_time)}
                                                     </p>
                                                     <p className="text-muted small mb-1">
-                                                        End: {lecture.end_time ? new Date(lecture.end_time).toLocaleString() : "N/A"}
+                                                        <strong>End:</strong> {formatDisplayTime(lecture.end_time)}
                                                     </p>
                                                     <p className="text-muted small mb-0">
-                                                        Lecturer: {lecture.lecturer_name || "N/A"}
+                                                        <strong>Lecturer:</strong> {lecture.lecturer_name || "N/A"}
                                                     </p>
                                                 </div>
-                                                <div className="d-flex">
-                                                    <button onClick={() => handleEditLecture(lecture)} className="btn btn-sm btn-outline-primary me-2" title="Edit">
+                                                <div className="d-flex gap-2">
+                                                    <button
+                                                        onClick={() => handleEnterClassroom(lecture.lecture_id,lecture.lecturer_z_code_id)}
+                                                        className="btn btn-sm btn-success"
+                                                        title="Enter Online Classroom"
+                                                    >
+                                                        Enter
+                                                    </button>
+                                                    <button onClick={() => handleEditLecture(lecture)} className="btn btn-sm btn-outline-primary" title="Edit">
                                                         <Edit size={16} />
                                                     </button>
                                                     <button onClick={() => handleDeleteLecture(lecture.lecture_id)} className="btn btn-sm btn-outline-danger" title="Delete">

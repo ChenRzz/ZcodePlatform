@@ -12,36 +12,6 @@ import type {
     UpdateRoleRequest
 } from "../dto/request/auth.ts";
 
-
-
-//authGroup := R.Group("/auth")
-// 	authGroup.Use(configs.AuthMiddleWares.CheckToken())
-// 	roleGroup := authGroup.Group("/role")
-// 	{
-// 		roleGroup.POST("/create", authhandler.CreateRole)
-// 		roleGroup.POST("/update", authhandler.UpdateRole)
-// 		roleGroup.POST("/delete", authhandler.DeleteRole)
-// 		roleGroup.POST("/byID", authhandler.FindRoleByID)
-// 		roleGroup.GET("/all", authhandler.FindAllRoles)
-//
-// 		roleGroup.POST("/auth_point/add", authhandler.SetAuthPointToRole)
-// 		roleGroup.POST("/auth_point/delete", authhandler.DeleteAuthPointToRole)
-// 		roleGroup.POST("/auth_point/all", authhandler.FindAuthPointsByRoleID)
-// 	}
-// 	authPointGroup := authGroup.Group("/authPoint")
-// 	{
-// 		authPointGroup.POST("/create", authhandler.CreateAuthPoint)
-// 		authPointGroup.POST("/update", authhandler.UpdateAuthPoint)
-// 		authPointGroup.POST("/delete", authhandler.DeleteAuthPoint)
-// 		authPointGroup.POST("/byID", authhandler.FindAuthPointByID)
-// 		authPointGroup.GET("/all", authhandler.FindAllAuthPoints)
-// 	}
-// 	userRoleGroup := authGroup.Group("/user_role")
-// 	{
-// 		userRoleGroup.POST("/add", authhandler.SetUserRoles)
-// 		userRoleGroup.POST("/delete", authhandler.DeleteUserRoles)
-// 		userRoleGroup.POST("/byID", authhandler.FindUserRoleByID)
-// 		userRoleGroup.POST("/byUID", authhandler.FindUserRoleByUserID)
 export const getAllRoles = async (): Promise<RoleInfo[]> => {
     const response = await axios.get("/auth/role/all");
     return response.data.data;
@@ -55,7 +25,7 @@ export const createRole = async (role:CreateRoleRequest)=> {
 
 export const updateRole = async (role: UpdateRoleRequest) => {
     const response = await axios.post("/auth/role/update", role);
-    return response.data;  // 返回更新后的角色信息
+    return response.data;
 };
 
 
@@ -65,11 +35,6 @@ export const deleteRole = async (roleId:DeleteRoleRequest)=> {
 };
 
 
-// authPointGroup.POST("/create", authhandler.CreateAuthPoint)
-// authPointGroup.POST("/update", authhandler.UpdateAuthPoint)
-// authPointGroup.POST("/delete", authhandler.DeleteAuthPoint)
-// authPointGroup.POST("/byID", authhandler.FindAuthPointByID)
-// authPointGroup.GET("/all", authhandler.FindAllAuthPoints)
 
 export const getAllAuthPoints = async (): Promise<AuthPointInfo[]> => {
     const response = await axios.get("/auth/authPoint/all");
@@ -115,25 +80,6 @@ export const deleteAuthPointOfRole= async (roleAuthPoint:DeleteAuthPointOfRoleRe
     return response.data;
 }
 
-//export interface getUserRolesByUIDRequest{
-//     user_id:number;
-// }
-//
-//
-// export interface DeleteUserRoleRequest{
-//     user_role_id:number;
-// }
-//
-// export interface setUserRoleRequest{
-//     user_id:number;
-//     role_id:number;
-//     assigned_by:number;
-// }
-//export interface UserRolesInfo {
-//     user_role_id: number;
-//     role_name: string;
-//     description: string;
-// }
 
 export  const getUserRolesByUID= async(userid:getUserRolesByUIDRequest):Promise<UserRolesInfo[]>=>{
     const response = await axios.post("/auth/user_role/by_userID",userid);

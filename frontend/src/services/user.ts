@@ -43,16 +43,6 @@ export const logoffUser = async (password: string) => {
     });
     return res.data;
 };
-
-//export interface getUserInfoByUserZcodeRequest{
-//     user_zcode_id:string
-// }
-//export interface UserInfos {
-//     user_id:number;
-//     user_name:string;
-//     user_email:string;
-//     user_z_code:string;
-// }
 export const getUserInfoByZCode = async (userzcode:getUserInfoByUserZcodeRequest):Promise<UserInfos> => {
     const res = await axios.post("/auth_user/userinfo/byZcode_input",userzcode);
     return res.data.data;

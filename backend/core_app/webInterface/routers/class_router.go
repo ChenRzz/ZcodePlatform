@@ -5,25 +5,6 @@ import (
 	"MScProject/core_app/webInterface/handllers"
 )
 
-// CreateClass(c *gin.Context)
-//
-//	DeleteClass(c *gin.Context)
-//	UpdateClassInfo(c *gin.Context)
-//	FindClassByID(c *gin.Context)
-//	FindClassByClassCode(c *gin.Context)
-//	FindAllClasses(c *gin.Context)
-//
-//	CreateLecture(c *gin.Context)
-//	DeleteLecture(c *gin.Context)
-//	UpdateLectureInfo(c *gin.Context)
-//	FindLectureByLectureID(c *gin.Context)
-//	FindLecturesByClassID(c *gin.Context)
-//
-//	AddParticipantToClass(c *gin.Context)
-//	DeleteParticipantFromClass(c *gin.Context)
-//	SetRoleForParticipant(c *gin.Context)
-//	FindClassesByParticipantZCodeID(c *gin.Context)
-//	FindParticipantsByClassID(c *gin.Context)
 func ClassRouter(classHandler *handllers.ClassHandler) {
 	classGroup := R.Group("/class")
 	classGroup.GET("/all", classHandler.FindAllClasses)

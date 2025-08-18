@@ -183,15 +183,6 @@ func (h *ClassHandler) FindLectureByLectureID(c *gin.Context) {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
-	//LectureID          uint       `json:"lecture_id"`
-	//CreatedAt          *time.Time `json:"created_at"`
-	//LectureName        string     `json:"lecture_name"`
-	//LectureDescription string     `json:"lecture_description"`
-	//ClassID            uint       `json:"class_id"`
-	//StartTime          *time.Time `json:"start_time"`
-	//EndTime            *time.Time `json:"end_time"`
-	//LecturerZCodeID    uint64     `json:"lecturer_z_code_id"`
-	//LecturerName       string     `json:"lecturer_name"`
 	var lectureinfo response.LectureInfo
 	lectureinfo.LectureID = lecture.ID
 	lectureinfo.CreatedAt = lecture.CreatedAt

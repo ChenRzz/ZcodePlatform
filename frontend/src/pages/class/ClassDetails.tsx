@@ -26,7 +26,7 @@ const ClassDetails = () => {
                 setClassInfo(classData);
 
                 const lecturesData = await getLecturesByClassID({ class_id: parseInt(classId) });
-                setLectures(lecturesData || []); // 确保lecturesData不为null
+                setLectures(lecturesData || []);
 
                 const userJoinedClasses = await getMyClasses();
                 setUserClasses(userJoinedClasses || []);
@@ -55,9 +55,9 @@ const ClassDetails = () => {
         }
     };
 
-    const handleEnterLecture = (lectureId: number) => {
+    const handleEnterLecture = (lectureId: number,lecturerZcode:string) => {
         if (!classInfo || !isClassJoined(classInfo.class_code)) return;
-        navigate(`/lecture/${lectureId}`);
+        navigate(`/classroom/${lectureId}/${lecturerZcode}`);
     };
 
     if (loading) {
@@ -188,7 +188,7 @@ const ClassDetails = () => {
 
                                                 <div className="flex-shrink-0">
                                                     <button
-                                                        onClick={() => handleEnterLecture(lecture.lecture_id)}
+                                                        onClick={() => handleEnterLecture(lecture.lecture_id,lecture.lecturer_z_code_id)}
                                                         disabled={!hasJoined}
                                                         className={`btn btn-sm ${
                                                             hasJoined

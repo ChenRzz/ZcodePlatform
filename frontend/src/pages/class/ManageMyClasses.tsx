@@ -82,7 +82,7 @@ const ManageMyClasses = () => {
             }
             try {
                 await updateClass(editingClass);
-                setEditingClass(null); // 更新后重置编辑状态
+                setEditingClass(null);
                 const data = await getManagedClasses();
                 setClasses(data);
             } catch (err) {

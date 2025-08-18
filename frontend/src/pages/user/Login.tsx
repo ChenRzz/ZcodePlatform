@@ -26,7 +26,7 @@ const Login = () => {
             setUserZcode(backendUserZcode);
             setRoles(roleNames);
             setMessage('🎉 Login successful!');
-            setTimeout(() => navigate('/'), 1500); // 登录成功后跳转首页
+            setTimeout(() => navigate('/'), 1500);
         } catch (error: any) {
             setMessage(`❌ Login failed: ${error.response?.data?.error || error.message}`);
         }

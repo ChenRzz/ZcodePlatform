@@ -1,4 +1,3 @@
-// pages/Home.tsx
 import { useEffect, useState } from "react";
 import { GetAllClasses } from "../services/class";
 import type {ClassInfo} from "../dto/response/class.ts";

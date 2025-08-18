@@ -1,5 +1,5 @@
 import  { useState, useEffect } from "react";
-import { GetAllClasses, getMyClasses, JoinClass } from "../../services/class"; // 引入加入课程的服务层
+import { GetAllClasses, getMyClasses, JoinClass } from "../../services/class"; 
 import type { ClassInfo, UserJoinedClassesInfo } from "../../dto/response/class";
 import { useNavigate } from "react-router-dom";
 import {useUser} from "../../context/UserContext.tsx";

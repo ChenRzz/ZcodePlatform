@@ -32,7 +32,7 @@ body {
   min-height: 100vh;
 }
 
-/* 链接样式 */
+
 a {
   font-weight: 500;
   color: #646cff;
@@ -48,7 +48,7 @@ h1 {
   line-height: 1.1;
 }
 
-/* 按钮样式 */
+
 button {
   border-radius: 8px;
   border: 1px solid transparent;
@@ -70,7 +70,7 @@ button:focus-visible {
   outline: 4px auto -webkit-focus-ring-color;
 }
 
-/* 深色模式样式 */
+
 @media (prefers-color-scheme: light) {
   :root {
     color: #213547;
@@ -86,11 +86,9 @@ button:focus-visible {
   }
 }
 
-/* =========================
-   布局容器样式
-   ========================= */
 
-/* 导航栏容器 - 固定在顶部 */
+
+
 .navbar-container {
   position: fixed;
   top: 0;
@@ -104,14 +102,14 @@ button:focus-visible {
   box-shadow: 0 2px 4px rgba(0,0,0,0.1);
 }
 
-/* 主容器 */
+
 .main-container {
   display: flex;
-  margin-top: 70px; /* 为导航栏留空间 */
+  margin-top: 70px;
   min-height: calc(100vh - 70px);
 }
 
-/* 侧边栏容器 */
+
 .sidebar-container {
   position: fixed;
   top: 70px;
@@ -122,18 +120,15 @@ button:focus-visible {
   overflow-y: auto;
 }
 
-/* 主内容容器 */
+
 .content-container {
-  margin-left: 250px; /* 为侧边栏留空间 */
+  margin-left: 250px;
   width: calc(100% - 250px);
   padding: 20px;
   background-color: #f8f9fa;
   min-height: calc(100vh - 70px);
 }
 
-/* =========================
-   侧边栏样式
-   ========================= */
 
 .sidebar {
   background: linear-gradient(135deg, #2c3e50 0%, #34495e 100%);
@@ -152,7 +147,7 @@ button:focus-visible {
   margin-bottom: 30px;
 }
 
-/* 侧边栏导航项 */
+
 .sidebar .nav-item {
   margin-bottom: 10px;
 }
@@ -179,7 +174,6 @@ button:focus-visible {
   color: white !important;
 }
 
-/* 侧边栏链接样式 */
 .sidebar-link {
   color: rgba(255, 255, 255, 0.9) !important;
   text-decoration: none !important;
@@ -195,8 +189,6 @@ button:focus-visible {
   color: white !important;
   transform: translateX(3px);
 }
-
-/* 下拉菜单子项样式 */
 .sidebar .nav-item div {
   padding-left: 10px;
   border-left: 2px solid rgba(255, 255, 255, 0.2);
@@ -209,9 +201,6 @@ button:focus-visible {
   padding: 6px 12px;
 }
 
-/* =========================
-   响应式设计
-   ========================= */
 
 @media (max-width: 992px) {
   .sidebar-container {
@@ -250,9 +239,6 @@ button:focus-visible {
   }
 }
 
-/* =========================
-   滚动条样式
-   ========================= */
 
 .sidebar-container::-webkit-scrollbar {
   width: 6px;
@@ -271,12 +257,22 @@ button:focus-visible {
   background: rgba(255, 255, 255, 0.5);
 }
 
-/* =========================
-   导航栏内部样式调整
-   ========================= */
-
 
 /* 清理不再使用的样式 */
 .main-content {
-  /* 这个类不再使用，已被 .content-container 替代 */
+}
+
+.classroom-content {
+  width: 100%;
+  min-height: calc(100vh - 60px);
+  padding: 0;
+  margin: 0;
+  background-color: #f8f9fa;
+  overflow-x: auto;
+}
+
+.classroom-content .container-fluid {
+  max-width: none;
+  padding-left: 15px;
+  padding-right: 15px;
 }

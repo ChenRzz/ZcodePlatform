@@ -216,12 +216,6 @@ func (a *AuthPermitHandler) FindAllAuthPoints(c *gin.Context) {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
-	//type AuthPointInfo struct {
-	//	AuthPointID    uint   `json:"auth_point_id"`
-	//	RequestMethod  string `json:"request_method"`
-	//	RequestPath    string `json:"request_path"`
-	//	PermissionCode string `json:"permission_code"`
-	//}
 	var authPointsinfo []*response.AuthPointInfo
 	for _, authpoint := range authPoints {
 		var authpointinfo response.AuthPointInfo

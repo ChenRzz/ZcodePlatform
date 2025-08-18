@@ -37,7 +37,7 @@ func (j *JwtManagement) GenerateToken(userinfo *base_Interface.Userinfo) (tokenS
 		Username:  userinfo.UsernameInfo,
 		UserZcode: userinfo.UserZcodeInfo,
 		RegisteredClaims: jwt.RegisteredClaims{
-			Subject:   string(userinfo.UserIDInfo), // 用户ID作为主题
+			Subject:   string(userinfo.UserIDInfo),
 			ExpiresAt: jwt.NewNumericDate(time.Now().Add(24 * time.Hour)),
 			IssuedAt:  jwt.NewNumericDate(time.Now()),
 			Issuer:    "CrzMscProject",

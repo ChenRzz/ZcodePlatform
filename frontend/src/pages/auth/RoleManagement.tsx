@@ -5,14 +5,13 @@ import type { CreateRoleRequest, DeleteRoleRequest, UpdateRoleRequest } from "..
 import { Modal, Button, Form } from "react-bootstrap";
 
 const RoleManagementPage = () => {
-    const [roles, setRoles] = useState<RoleInfo[]>([]); // 角色列表
-    const [showModal, setShowModal] = useState(false); // 控制模态框显示与隐藏
-    const [currentRole, setCurrentRole] = useState<RoleInfo | null>(null); // 当前编辑的角色
-    const [roleName, setRoleName] = useState(""); // 角色名称
-    const [roleDescription, setRoleDescription] = useState(""); // 角色描述
-    const [isEditing, setIsEditing] = useState(false); // 是否为编辑模式
+    const [roles, setRoles] = useState<RoleInfo[]>([]);
+    const [showModal, setShowModal] = useState(false);
+    const [currentRole, setCurrentRole] = useState<RoleInfo | null>(null);
+    const [roleName, setRoleName] = useState("");
+    const [roleDescription, setRoleDescription] = useState("");
+    const [isEditing, setIsEditing] = useState(false);
 
-    // 获取所有角色数据
     useEffect(() => {
         const fetchRoles = async () => {
             try {
@@ -25,30 +24,27 @@ const RoleManagementPage = () => {
         fetchRoles();
     }, []);
     console.log(roles)
-    // 打开模态框，准备创建或更新角色
     const handleShowModal = (role?: RoleInfo) => {
         if (role) {
             setRoleName(role.role_name);
             setRoleDescription(role.role_description);
             setCurrentRole(role);
-            setIsEditing(true);  // 进入编辑模式
+            setIsEditing(true);
         } else {
             setRoleName("");
             setRoleDescription("");
             setCurrentRole(null);
-            setIsEditing(false);  // 进入创建模式
+            setIsEditing(false);
         }
         setShowModal(true);
     };
 
-    // 关闭模态框并清空数据
     const handleCloseModal = () => {
         setShowModal(false);
         setRoleName("");
         setRoleDescription("");
     };
 
-    // 创建角色
     const handleCreateRole = async () => {
         try {
             const newRole: CreateRoleRequest = {
@@ -71,14 +67,13 @@ const RoleManagementPage = () => {
     };
     const fetchRoles = async () => {
         try {
-            const data = await getAllRoles(); // 获取角色数据
-            setRoles(data); // 更新状态，渲染角色列表
+            const data = await getAllRoles();
+            setRoles(data);
         } catch (err) {
             console.error("Failed to fetch roles:", err);
         }
     };
 
-    // 更新角色
     const handleUpdateRole = async () => {
         if (currentRole) {
             try {
@@ -100,7 +95,6 @@ const RoleManagementPage = () => {
         }
     };
 
-    // 删除角色
     const handleDeleteRole = async (roleId: number) => {
         try {
             const roleid:DeleteRoleRequest={
@@ -121,12 +115,12 @@ const RoleManagementPage = () => {
         <div className="container mt-5">
             <h1 className="mb-4">Role Management</h1>
 
-            {/* 创建按钮 */}
+            {/* Create */}
             <Button variant="primary" onClick={() => handleShowModal()}>
                 Create Role
             </Button>
 
-            {/* 角色列表 */}
+            {/* Role List */}
             <div className="mt-4">
                 <table className="table table-bordered">
                     <thead>
@@ -195,7 +189,7 @@ const RoleManagementPage = () => {
                     </Button>
                     <Button
                         variant="primary"
-                        onClick={isEditing ? handleUpdateRole : handleCreateRole} // 根据是否编辑来决定调用哪个函数
+                        onClick={isEditing ? handleUpdateRole : handleCreateRole}
                     >
                         {isEditing ? "Update" : "Create"}
                     </Button>

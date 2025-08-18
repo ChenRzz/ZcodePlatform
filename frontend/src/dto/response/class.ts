@@ -1,4 +1,4 @@
-// src/dto/class.ts
+
 
 export interface ClassInfo {
     class_id: number;

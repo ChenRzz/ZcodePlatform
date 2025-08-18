@@ -5,27 +5,6 @@ import (
 	"MScProject/core_app/webInterface/handllers"
 )
 
-// CreateRole(c *gin.Context)
-//
-//	UpdateRole(c *gin.Context)
-//	FindRoleByID(c *gin.Context)
-//	DeleteRole(c *gin.Context)
-//	FindAllRoles(c *gin.Context)
-//
-//	CreateAuthPoint(c *gin.Context)
-//	UpdateAuthPoint(c *gin.Context)
-//	DeleteAuthPoint(c *gin.Context)
-//	FindAuthPointByID(c *gin.Context)
-//	FindAllAuthPoints(c *gin.Context)
-//
-//	SetAuthPointToRole(c *gin.Context)
-//	DeleteAuthPointToRole(c *gin.Context)
-//	FindAuthPointsByRoleID(c *gin.Context)
-//
-//	SetUserRoles(c *gin.Context)
-//	DeleteUserRoles(c *gin.Context)
-//	FindUserRoleByID(c *gin.Context)
-//	FindUserRoleByUserID(c *gin.Context)
 func AuthPermitRouter(authhandler *handllers.AuthPermitHandler) {
 	authGroup := R.Group("/auth")
 	authGroup.Use(configs.AuthMiddleWares.CheckToken()).Use(configs.AuthMiddleWares.CheckPermissions())

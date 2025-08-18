@@ -26,7 +26,7 @@ const ManageUserRolesPage = () => {
             setLoading(true);
             setError(null);
             const data = await getUserRolesByUID({ user_id: Number(userId) });
-            setUserRoles(data || []); // 防止 null
+            setUserRoles(data || []);
         } catch (err) {
             setError("Failed to load user roles.");
         } finally {
@@ -69,7 +69,7 @@ const ManageUserRolesPage = () => {
             const payload: setUserRoleRequest[] = selectedRoleIds.map(role_id => ({
                 user_id: Number(userId),
                 role_id,
-                assigned_by: 1, // 硬编码为 1
+                assigned_by: 1,
             }));
             await setUserRole(payload);
             setShowAddModal(false);

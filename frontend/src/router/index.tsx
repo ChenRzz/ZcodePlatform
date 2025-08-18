@@ -15,6 +15,7 @@ import UserRoleManagement from "../pages/auth/UserRoleManagement.tsx";
 import UserRoleDetails from "../pages/auth/UserRoleDetails.tsx";
 import ClassDetails from "../pages/class/ClassDetails.tsx";
 import ClassDetailsManagement from "../pages/class/ClassDetailsManagement.tsx";
+import {ClassroomEntry} from "../pages/classroom/ClassroomEntry.tsx";
 
 const AppRouter = () => {
     return (
@@ -34,6 +35,7 @@ const AppRouter = () => {
                 <Route path="/role/:roleId/authpoints" element={<RoleAuthDetails />}/>
                 <Route path="/auth/user_role" element={<UserRoleManagement/>}/>
                 <Route path="/manage-roles/:userId" element={<UserRoleDetails />} />
+            <Route path="/classroom/:lectureId/:lecturerZcode" element={<ClassroomEntry />} />
         </Routes>
     );
 };

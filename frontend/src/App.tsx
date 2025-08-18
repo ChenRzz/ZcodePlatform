@@ -1,11 +1,33 @@
 import AppRouter from "./router";
 import Navbar from "./components/Navbar";
 import Sidebar from "./components/SIdeBar";
-import {BrowserRouter} from "react-router-dom";
+import {BrowserRouter, useLocation} from "react-router-dom";
 import "./index.css";
-function App() {
+
+
+function AppContent() {
+    const location = useLocation();
+
+    const isClassroomPage = location.pathname.startsWith('/classroom/');
+
+    if (isClassroomPage) {
+        return (
+            <>
+                {/* Fixed Navbar */}
+                <div className="navbar-container">
+                    <Navbar />
+                </div>
+
+                {/* Classroom content without sidebar */}
+                <div className="classroom-content" style={{ paddingTop: '70px' }}>
+                    <AppRouter />
+                </div>
+            </>
+        );
+    }
+
     return (
-        <BrowserRouter>
+        <>
             {/* Fixed Navbar */}
             <div className="navbar-container">
                 <Navbar />
@@ -22,6 +44,14 @@ function App() {
                     <AppRouter />
                 </div>
             </div>
+        </>
+    );
+}
+
+function App() {
+    return (
+        <BrowserRouter>
+            <AppContent />
         </BrowserRouter>
     );
 }

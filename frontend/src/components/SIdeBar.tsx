@@ -4,8 +4,8 @@ import { FaKey, FaBookOpen } from "react-icons/fa";
 import { useState } from "react";
 
 const Sidebar = () => {
-    const [classMenuOpen, setClassMenuOpen] = useState(false); // 控制 class 菜单展开收起
-    const [authMenuOpen, setAuthMenuOpen] = useState(false);   // 控制 auth 菜单展开收起
+    const [classMenuOpen, setClassMenuOpen] = useState(false);
+    const [authMenuOpen, setAuthMenuOpen] = useState(false); 
 
     return (
         <div

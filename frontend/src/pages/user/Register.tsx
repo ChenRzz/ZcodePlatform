@@ -14,7 +14,7 @@ const Register = () => {
         try {
             await registerUser(username, email, password);
             setMessage('🎉 Registration successful!');
-            setTimeout(() => navigate('/login'), 1500); // 注册成功后跳转到登录页
+            setTimeout(() => navigate('/login'), 1500);
         } catch (error: any) {
             setMessage(`❌ Registration failed: ${error.response?.data?.error || error.message}`);
         }
