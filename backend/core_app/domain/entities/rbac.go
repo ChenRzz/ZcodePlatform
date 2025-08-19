@@ -6,6 +6,10 @@ type Role struct {
 	Description string
 }
 
+func (Role) TableName() string {
+	return "roles"
+}
+
 type UserRole struct {
 	BaseEntity
 	UserID     uint

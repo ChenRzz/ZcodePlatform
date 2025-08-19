@@ -7,3 +7,7 @@ type User struct {
 	Email    string `gorm:"size:100;unique"`
 	ZCodeID  uint64 `gorm:"unique"`
 }
+
+func (User) TableName() string {
+	return "users"
+}

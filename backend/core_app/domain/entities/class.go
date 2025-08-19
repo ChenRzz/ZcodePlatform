@@ -13,6 +13,10 @@ type Class struct {
 	ClassManagerName    string `json:"class_manager_name"`
 }
 
+func (Class) TableName() string {
+	return "classes"
+}
+
 type Lecture struct {
 	BaseEntity
 	LectureName        string     `gorm:"size:255" json:"lecture_name"`
@@ -24,6 +28,10 @@ type Lecture struct {
 	LecturerName       string     `gorm:"size 255" json:"lecturer_name"`
 }
 
+func (Lecture) TableName() string {
+	return "lectures"
+}
+
 type ClassParticipants struct {
 	BaseEntity
 	ClassID     uint   `json:"class_id"`
@@ -31,4 +39,8 @@ type ClassParticipants struct {
 	UserZCodeID uint64 `json:"user_zcode_id" gorm:"column:user_zcode_id"`
 	Username    string `json:"username"`
 	UserRole    string `json:"user_role"`
+}
+
+func (ClassParticipants) TableName() string {
+	return "class_participants"
 }
