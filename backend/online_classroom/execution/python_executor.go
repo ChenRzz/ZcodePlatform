@@ -43,7 +43,7 @@ func (pe *PythonExecutor) Execute(code string, config ExecutionConfig) (*Executi
 		result.DurationMS = time.Since(startTime).Milliseconds()
 		return result, nil
 	}
-	defer os.Remove(tempFile)
+//	defer os.Remove(tempFile)
 
 	output, execError, exitCode := pe.executeInDocker(tempFile, config)
 
@@ -62,25 +62,28 @@ func (pe *PythonExecutor) Execute(code string, config ExecutionConfig) (*Executi
 }
 
 func (pe *PythonExecutor) createTempPythonFile(code string) (string, error) {
-	tempDir := os.TempDir()
+	tempDir :="/host/tmp"
 	log.Printf("DEBUG: Temp dir: %s", tempDir)
 
 	fileName := fmt.Sprintf("python_exec_%s.py", generateExecutionID())
-	filePath := filepath.Join(tempDir, fileName)
+	filePath :=filepath.Join(tempDir, fileName)
 	log.Printf("DEBUG: File path: %s", filePath)
 	log.Printf("DEBUG: Code to write: %s", code)
-
+	if _, err := os.Stat(filePath); err == nil {
+		log.Printf("WARNING: File already exists: %s", filePath)
+    	}
+	log.Printf("DEBUG: Writing file with os.WriteFile...")
 	err := os.WriteFile(filePath, []byte(code), 0644)
 	if err != nil {
 		log.Printf("ERROR: WriteFile failed: %v", err)
 		return "", err
 	}
-
+	log.Printf("DEBUG: WriteFile completed")
 	if stat, err := os.Stat(filePath); err != nil {
 		log.Printf("ERROR: Stat failed: %v", err)
 		return "", err
 	} else {
-		log.Printf("DEBUG: File created successfully: %s, IsDir: %v, Size: %d", filePath, stat.IsDir(), stat.Size())
+		log.Printf("DEBUG: File created successfully: %s, IsDir: %v, Size: %d, Mode: %v", filePath, stat.IsDir(), stat.Size(),stat.Mode())
 	}
 
 	return filePath, nil
@@ -92,13 +95,15 @@ func (pe *PythonExecutor) executeInDocker(filePath string, config ExecutionConfi
 	defer cancel()
 
 	fileName := filepath.Base(filePath)
+	log.Printf("DEBUG: filePath=%s, fileName=%s", filePath, fileName)
+	log.Printf("DEBUG: Mount source=/host%s, Mount target=/app/%s", filePath, fileName)
 
 	dockerArgs := []string{
 		"run",
 		"--rm",
 		"--network", "none",
 		"--read-only",
-		"--tmpfs", "/tmp:rw,noexec,nosuid,size=10m",
+//		"--tmpfs", "/tmp:rw,noexec,nosuid,size=10m",
 		"--user", "nobody",
 		"--cap-drop", "ALL",
 		"--security-opt", "no-new-privileges",
@@ -110,12 +115,15 @@ func (pe *PythonExecutor) executeInDocker(filePath string, config ExecutionConfi
 	if config.CPULimit > 0 {
 		dockerArgs = append(dockerArgs, "--cpus", fmt.Sprintf("%.2f", config.CPULimit))
 	}
+	mountSource := strings.Replace(filePath, "/host/tmp/", "/tmp/", 1)
 
 	dockerArgs = append(dockerArgs,
-		"-v", fmt.Sprintf("/host%s:/app/%s:ro", filePath, fileName),
+		"-v",fmt.Sprintf("%s:/app/%s:ro", mountSource, fileName),
 		"python:3.11-alpine",
 		"python", fmt.Sprintf("/app/%s", fileName),
 	)
+	log.Printf("DEBUG: Docker command: %s", strings.Join(append([]string{"docker"}, dockerArgs...), " "))
+
 
 	cmd := exec.CommandContext(ctx, "docker", dockerArgs...)
 
@@ -124,7 +132,9 @@ func (pe *PythonExecutor) executeInDocker(filePath string, config ExecutionConfi
 	cmd.Stderr = &stderr
 
 	err := cmd.Run()
-
+	log.Printf("DEBUG: Docker stdout: %s", stdout.String())
+    	log.Printf("DEBUG: Docker stderr: %s", stderr.String())
+	log.Printf("DEBUG: Docker error: %v", err)
 	output := stdout.String()
 	if stderr.Len() > 0 {
 		if output != "" {
