@@ -112,7 +112,7 @@ func (pe *PythonExecutor) executeInDocker(filePath string, config ExecutionConfi
 	}
 
 	dockerArgs = append(dockerArgs,
-		"-v", fmt.Sprintf("%s:/app/%s:ro", filePath, fileName),
+		"-v", fmt.Sprintf("/host%s:/app/%s:ro", filePath, fileName),
 		"python:3.11-alpine",
 		"python", fmt.Sprintf("/app/%s", fileName),
 	)
