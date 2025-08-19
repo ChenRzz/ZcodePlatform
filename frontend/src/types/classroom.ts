@@ -29,6 +29,7 @@ export interface ChatMessage {
 
 export interface JoinClassroomResponse {
     lecture_id: number
+    lecture_name:string
     user_zcode: string
     user_name: string
     user_role: 'teacher' | 'student'

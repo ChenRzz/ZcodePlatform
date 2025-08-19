@@ -1,6 +1,7 @@
 package online_classroom
 
 import (
+	"MScProject/configs"
 	"MScProject/core_app/webInterface/routers"
 	"MScProject/online_classroom/execution"
 )
@@ -8,6 +9,7 @@ import (
 func ClassroomRouter() {
 	routers.R.GET("/ws/classroom/:lecture_id", WebSocketUpgradeHandler)
 	api := routers.R.Group("/api")
+	api.Use(configs.AuthMiddleWares.CheckToken())
 	{
 		classroom := api.Group("/classroom")
 		{

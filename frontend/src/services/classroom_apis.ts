@@ -25,14 +25,16 @@ export const classroomService = {
         lectureId: number,
         zcode: string,
         lecturerZcode: string,
-        name: string | null
+        name: string | null,
+        lectureName?:string,
     ): Promise<JoinClassroomResponse> {
         try {
             const response = await instance.post('/api/classroom/join', {
                 lecture_id: lectureId,
                 zcode: zcode,
                 lecturer_zcode: lecturerZcode,
-                name: name || zcode
+                name: name || zcode,
+                lecture_name:lectureName,
             });
 
             if (response.data.success) {

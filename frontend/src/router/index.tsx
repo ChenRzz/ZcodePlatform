@@ -35,7 +35,7 @@ const AppRouter = () => {
                 <Route path="/role/:roleId/authpoints" element={<RoleAuthDetails />}/>
                 <Route path="/auth/user_role" element={<UserRoleManagement/>}/>
                 <Route path="/manage-roles/:userId" element={<UserRoleDetails />} />
-            <Route path="/classroom/:lectureId/:lecturerZcode" element={<ClassroomEntry />} />
+            <Route path="/classroom/:lectureId/:lecturerZcode/:lectureName" element={<ClassroomEntry />} />
         </Routes>
     );
 };

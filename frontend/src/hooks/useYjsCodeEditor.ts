@@ -6,6 +6,8 @@ import { useWebSocketContext } from '../context/WebsocketContext.tsx'
 
 interface UseYjsCodeEditorProps {
     documentKey: string
+    userZCode: string
+    userRole: 'teacher' | 'student'
 }
 
 interface UseYjsCodeEditorReturn {
@@ -16,15 +18,67 @@ interface UseYjsCodeEditorReturn {
     getCurrentContent: () => string
     setInitialContent: (content: string) => void
     sendYjsSyncRequest: (documentKey: string) => void
+    canEdit: boolean
+    syncStatus: 'syncing' | 'synced' | 'conflict' | 'offline'
+}
+
+
+const globalYDocs = new Map<string, Y.Doc>()
+const globalWebSocketHandlers = new Map<string, any>()
+
+
+const getOrCreateYDoc = (documentKey: string): Y.Doc => {
+    if (!globalYDocs.has(documentKey)) {
+        const ydoc = new Y.Doc()
+
+        try {
+            const stored = localStorage.getItem(`ydoc_${documentKey}`)
+            if (stored) {
+                const data = JSON.parse(stored)
+                if (data.update && Array.isArray(data.update)) {
+                    const storedUpdate = new Uint8Array(data.update)
+                    Y.applyUpdate(ydoc, storedUpdate, 'storage-load')
+                    console.log(`[YJS Global] Restored YDoc for ${documentKey}`)
+                }
+            }
+        } catch (error) {
+            console.error('[YJS Global] Failed to restore YDoc:', error)
+        }
+
+        globalYDocs.set(documentKey, ydoc)
+        console.log(`[YJS Global] Created YDoc for ${documentKey}`)
+    }
+    return globalYDocs.get(documentKey)!
+}
+
+const saveYDoc = (documentKey: string) => {
+    const ydoc = globalYDocs.get(documentKey)
+    if (ydoc) {
+        try {
+            const stateUpdate = Y.encodeStateAsUpdate(ydoc)
+            const data = {
+                update: Array.from(stateUpdate),
+                timestamp: Date.now()
+            }
+            localStorage.setItem(`ydoc_${documentKey}`, JSON.stringify(data))
+            console.log(`[YJS Global] Saved YDoc for ${documentKey}`)
+        } catch (error) {
+            console.error('[YJS Global] Save failed:', error)
+        }
+    }
 }
 
 export const useYjsCodeEditor = ({
-                                     documentKey
+                                     documentKey,
+                                     userZCode,
+                                     userRole
                                  }: UseYjsCodeEditorProps): UseYjsCodeEditorReturn => {
-    const [ydoc] = useState(() => new Y.Doc())
+
+    const ydoc = getOrCreateYDoc(documentKey)
+
     const bindingRef = useRef<MonacoBinding | null>(null)
-    const isInitializedRef = useRef(false)
-    const currentDocumentKeyRef = useRef(documentKey)
+    const [syncStatus, setSyncStatus] = useState<'syncing' | 'synced' | 'conflict' | 'offline'>('offline')
+    const hasSyncedRef = useRef(false)
 
     const {
         isConnected,
@@ -35,39 +89,44 @@ export const useYjsCodeEditor = ({
         sendYjsSyncResponse
     } = useWebSocketContext()
 
+
+    const canEdit = useCallback((): boolean => {
+        if (!isConnected) return false
+        if (userRole === 'teacher') return true
+        if (userRole === 'student') {
+            return documentKey === `student-${userZCode}` || documentKey === userZCode
+        }
+        return false
+    }, [isConnected, userRole, documentKey, userZCode])
+
     const getCurrentContent = useCallback((): string => {
-        const ytext = ydoc.getText(documentKey)
-        return ytext.toString()
+        return ydoc.getText(documentKey).toString()
     }, [ydoc, documentKey])
 
     const setInitialContent = useCallback((content: string) => {
         if (!content) return
-
         const currentContent = getCurrentContent()
-        console.log(`[YJS] setInitialContent called for ${documentKey}, current length: ${currentContent.length}, new content length: ${content.length}`)
-
         if (currentContent.length === 0) {
-            console.log(`[YJS] Setting initial content for empty document: ${documentKey}`)
+            console.log(`[YJS] Setting initial content for ${documentKey}`)
             const ytext = ydoc.getText(documentKey)
             ydoc.transact(() => {
                 ytext.insert(0, content)
             }, 'initial')
-        } else if (currentContent === content) {
-            console.log(`[YJS] Content already matches initial content for ${documentKey}, skipping`)
-        } else {
-            console.log(`[YJS] Document ${documentKey} has content (${currentContent.length} chars), not setting initial content`)
         }
     }, [ydoc, documentKey, getCurrentContent])
 
     const bindToMonaco = useCallback((monacoEditor: editor.IStandaloneCodeEditor) => {
-        console.log(`[YJS] Binding Monaco editor to YJS document: ${documentKey}`)
+        console.log(`[YJS] Binding Monaco to ${documentKey}`)
 
         if (bindingRef.current) {
-            console.log(`[YJS] Destroying previous binding`)
             bindingRef.current.destroy()
             bindingRef.current = null
         }
+
         const ytext = ydoc.getText(documentKey)
+        const readOnly = !canEdit()
+
+        monacoEditor.updateOptions({ readOnly })
 
         bindingRef.current = new MonacoBinding(
             ytext,
@@ -75,43 +134,66 @@ export const useYjsCodeEditor = ({
             new Set([monacoEditor])
         )
 
-        console.log(`[YJS] Monaco editor bound to ${documentKey}, content length: ${ytext.length}`)
-    }, [ydoc, documentKey])
+        const content = ytext.toString()
+        console.log(`[YJS] Bound ${documentKey}: ${content.length} chars, readOnly: ${readOnly}`)
+    }, [ydoc, documentKey, canEdit])
 
     useEffect(() => {
-        if (currentDocumentKeyRef.current !== documentKey) {
-            console.log(`[YJS] Document key changed from ${currentDocumentKeyRef.current} to ${documentKey}`)
-            currentDocumentKeyRef.current = documentKey
-            isInitializedRef.current = false
-            const ytext = ydoc.getText(documentKey)
-            if (ytext.length > 0) {
-                ydoc.transact(() => {
-                    ytext.delete(0, ytext.length)
-                }, 'reset')
-            }
+        const ytext = ydoc.getText(documentKey)
 
-            if (isConnected) {
-                console.log(`[YJS] Requesting sync for new document: ${documentKey}`)
-                sendYjsSyncRequest(documentKey)
-                isInitializedRef.current = true
+        const handleTextUpdate = () => {
+            console.log(`[YJS] Text update detected for ${documentKey}`)
+
+            if (isConnected && canEdit()) {
+                const docUpdate = Y.encodeStateAsUpdate(ydoc)
+                console.log(`[YJS] Sending update for ${documentKey} (by ${userRole}:${userZCode})`)
+                sendYjsUpdate(documentKey, docUpdate)
+                setSyncStatus('synced')
             }
         }
-    }, [documentKey, isConnected, sendYjsSyncRequest, ydoc])
+
+        ytext.observe(handleTextUpdate)
+        return () => {
+            ytext.unobserve(handleTextUpdate)
+        }
+    }, [ydoc, documentKey, isConnected, canEdit, sendYjsUpdate, userRole, userZCode])
+
+
+    useEffect(() => {
+        const saveKey = `${documentKey}_save`
+
+        if (!globalWebSocketHandlers.has(saveKey)) {
+            const handleGlobalUpdate = ( origin: any) => {
+                if (origin !== 'storage-load') {
+                    setTimeout(() => saveYDoc(documentKey), 1000)
+                }
+            }
+
+            ydoc.on('update', handleGlobalUpdate)
+            globalWebSocketHandlers.set(saveKey, handleGlobalUpdate)
+
+            return () => {
+                ydoc.off('update', handleGlobalUpdate)
+                globalWebSocketHandlers.delete(saveKey)
+            }
+        }
+    }, [ydoc, documentKey])
 
     useEffect(() => {
         const unsubscribeUpdate = subscribe('yjs_update', (message) => {
             const data = message.data
             if (data.document_key === documentKey && data.update && data.update.length > 0) {
-                console.log(`[YJS] Applying update for ${documentKey} from ${message.sender}`)
-                const update = new Uint8Array(data.update)
-                Y.applyUpdate(ydoc, update, 'remote')
+                console.log(`[YJS] Received update for ${documentKey} from ${message.sender}`)
+                const remoteUpdate = new Uint8Array(data.update)
+                Y.applyUpdate(ydoc, remoteUpdate, 'remote')
+                setSyncStatus('synced')
             }
         })
 
         const unsubscribeSyncRequest = subscribe('yjs_sync_request', (message) => {
             const data = message.data
-            if (data.document_key === documentKey && data.requester) {
-                console.log(`[YJS] Received sync request for ${documentKey} from ${data.requester}`)
+            if (data.document_key === documentKey && data.requester && data.requester !== userZCode) {
+                console.log(`[YJS] Sync request for ${documentKey} from ${data.requester}`)
                 const stateVector = Y.encodeStateAsUpdate(ydoc)
                 sendYjsSyncResponse(documentKey, stateVector, data.requester)
             }
@@ -119,15 +201,14 @@ export const useYjsCodeEditor = ({
 
         const unsubscribeSyncResponse = subscribe('yjs_sync_response', (message) => {
             const data = message.data
-            if (data.document_key === documentKey && data.requester) {
-                console.log(`[YJS] Received sync response for ${documentKey}, requester: ${data.requester}, data size: ${data.update?.length || 0}`)
+            if (data.document_key === documentKey && data.requester === userZCode) {
+                console.log(`[YJS] Sync response for ${documentKey}`)
                 if (data.update && data.update.length > 0) {
-                    const update = new Uint8Array(data.update)
-                    Y.applyUpdate(ydoc, update, 'remote')
-                    console.log(`[YJS] Applied sync response, document now has ${ydoc.getText(documentKey).length} characters`)
-                } else {
-                    console.log(`[YJS] Sync response has no update data for ${documentKey}`)
+                    const syncUpdate = new Uint8Array(data.update)
+                    Y.applyUpdate(ydoc, syncUpdate, 'sync')
+                    console.log(`[YJS] Applied sync for ${documentKey}`)
                 }
+                setSyncStatus('synced')
             }
         })
 
@@ -136,56 +217,42 @@ export const useYjsCodeEditor = ({
             unsubscribeSyncRequest()
             unsubscribeSyncResponse()
         }
-    }, [documentKey, ydoc, subscribe, sendYjsSyncResponse])
+    }, [documentKey, ydoc, subscribe, sendYjsSyncResponse, userZCode])
+
 
     useEffect(() => {
-        const handleUpdate = (update: Uint8Array, origin: any) => {
-            if (origin !== 'remote' && isConnected) {
-                console.log(`[YJS] Sending update for ${documentKey}`)
-                sendYjsUpdate(documentKey, update)
+        if (isConnected) {
+            console.log(`[YJS] Connected for ${documentKey}`)
+            setSyncStatus('syncing')
+
+            if (!hasSyncedRef.current) {
+                const syncTimer = setTimeout(() => {
+                    console.log(`[YJS] Requesting sync for ${documentKey}`)
+                    sendYjsSyncRequest(documentKey)
+                    hasSyncedRef.current = true
+                    setTimeout(() => setSyncStatus('synced'), 1000)
+                }, 500)
+
+                return () => clearTimeout(syncTimer)
             }
-        }
-
-        ydoc.on('update', handleUpdate)
-
-        return () => {
-            ydoc.off('update', handleUpdate)
-        }
-    }, [ydoc, documentKey, isConnected, sendYjsUpdate])
-
-    useEffect(() => {
-        if (isConnected && !isInitializedRef.current) {
-            console.log(`[YJS] Requesting initial sync for ${documentKey}`)
-
-            const syncTimeout = setTimeout(() => {
-                sendYjsSyncRequest(documentKey)
-                isInitializedRef.current = true
-            }, 500)
-
-            return () => clearTimeout(syncTimeout)
+        } else {
+            console.log(`[YJS] Disconnected from ${documentKey}`)
+            setSyncStatus('offline')
+            hasSyncedRef.current = false
         }
     }, [isConnected, documentKey, sendYjsSyncRequest])
 
-    useEffect(() => {
-        if (isConnected && isInitializedRef.current) {
-            const retryTimeout = setTimeout(() => {
-                const currentContent = getCurrentContent()
-                if (currentContent.length === 0) {
-                    console.log(`[YJS] No content received, retrying sync for ${documentKey}`)
-                    sendYjsSyncRequest(documentKey)
-                }
-            }, 3000)
-
-            return () => clearTimeout(retryTimeout)
-        }
-    }, [isConnected, documentKey, sendYjsSyncRequest, getCurrentContent])
 
     useEffect(() => {
-        if (!isConnected) {
-            isInitializedRef.current = false
+        if (bindingRef.current) {
+            const readOnly = !canEdit()
+            bindingRef.current.editors.forEach(editor => {
+                editor.updateOptions({ readOnly })
+            })
         }
-    }, [isConnected])
-    
+    }, [canEdit])
+
+
     useEffect(() => {
         return () => {
             if (bindingRef.current) {
@@ -202,6 +269,8 @@ export const useYjsCodeEditor = ({
         bindToMonaco,
         getCurrentContent,
         setInitialContent,
-        sendYjsSyncRequest
+        sendYjsSyncRequest,
+        canEdit: canEdit(),
+        syncStatus
     }
 }

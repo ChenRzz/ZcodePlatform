@@ -8,9 +8,10 @@ import { StudentView } from './StudentView.tsx'
 import { AlertTriangle, RefreshCw, ArrowLeft, Wifi, Users, BookOpen } from 'lucide-react'
 
 export const ClassroomEntry: React.FC = () => {
-    const { lectureId, lecturerZcode } = useParams<{
+    const { lectureId, lecturerZcode,lectureName} = useParams<{
         lectureId: string
         lecturerZcode: string
+        lectureName:string
     }>()
 
     const navigate = useNavigate()
@@ -51,7 +52,8 @@ export const ClassroomEntry: React.FC = () => {
                 parseInt(lectureId),
                 userZcode,
                 lecturerZcode,
-                username
+                username,
+                lectureName
             )
 
             setClassroomData(response)
@@ -74,7 +76,7 @@ export const ClassroomEntry: React.FC = () => {
 
     useEffect(() => {
         joinClassroom()
-    }, [lectureId, lecturerZcode, userZcode, username])
+    }, [lectureId, lecturerZcode, userZcode, username,lectureName])
 
     const handleRetry = () => {
         joinClassroom(true)

@@ -1,3 +1,7 @@
+CREATE DATABASE IF NOT EXISTS MscProject;
+USE MscProject;
+
+
 Create TABLE IF NOT Exists users(
     id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
     username varchar(100) NOT NULL Unique,

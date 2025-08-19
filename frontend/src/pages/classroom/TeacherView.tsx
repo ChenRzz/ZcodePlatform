@@ -29,6 +29,7 @@ const TeacherViewContent: React.FC<TeacherViewProps> = ({ classroomData }) => {
     const lectureId = classroomData.lecture_id
     const teacherZcode = classroomData.user_zcode
     const teacherName = classroomData.user_name
+    const lectureName=classroomData.lecture_name
 
     const [currentState, setCurrentState] = useState<ClassroomState | null>(null)
     const [selectedStudentZCode, setSelectedStudentZCode] = useState<string | null>(null)
@@ -249,7 +250,7 @@ const TeacherViewContent: React.FC<TeacherViewProps> = ({ classroomData }) => {
                             <div className="d-flex justify-content-between align-items-center">
                                 <div>
                                     <h1 className="h4 mb-2 d-flex align-items-center">
-                                        🎓 Online Classroom #{lectureId}
+                                        🎓 {lectureName} #{lectureId}
                                     </h1>
                                     <p className="text-muted mb-0">
                                         Teacher: {teacherName} ({teacherZcode}) | Online: {currentState?.online_count || 0} users |
@@ -321,6 +322,7 @@ const TeacherViewContent: React.FC<TeacherViewProps> = ({ classroomData }) => {
                                         documentKey="teacher-code"
                                         title="📖 Teacher Demo"
                                         userRole="teacher"
+                                        userZCode={teacherZcode}
                                         onExecute={handleExecuteTeacherCode}
                                         height="240px"
                                         initialContent={!hasInitializedTeacherCode ? "# Welcome to Python class!\nprint('Hello, students!')\n\n# Today's lesson: Functions\ndef calculate_area(length, width):\n    return length * width\n\n# Example\narea = calculate_area(5, 3)\nprint(f'Area: {area}')" : ""}
@@ -357,10 +359,12 @@ const TeacherViewContent: React.FC<TeacherViewProps> = ({ classroomData }) => {
                                     <div className="row g-2">
                                         <div className="col-8">
                                             <CodeEditor
+                                                key={`student-${selectedStudentZCode}`}
                                                 documentKey={`student-${selectedStudentZCode}`}
                                                 title={`👨‍🎓 ${selectedStudent?.name || selectedStudentZCode}`}
                                                 userRole="teacher"
                                                 readOnly={false}
+                                                userZCode={teacherZcode}
                                                 onExecute={handleExecuteStudentCode}
                                                 height="280px"
                                             />

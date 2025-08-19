@@ -2,12 +2,13 @@ import React, { useRef, useState, useEffect } from 'react'
 import { Editor, useMonaco } from '@monaco-editor/react'
 import { editor } from 'monaco-editor'
 import { useYjsCodeEditor } from '../hooks/useYjsCodeEditor'
-import { Play, Users, Wifi, WifiOff, AlertCircle, CheckCircle, RefreshCw } from 'lucide-react'
+import { Play, Users, Wifi, WifiOff, AlertCircle, CheckCircle, RefreshCw, Lock, Eye, RotateCw } from 'lucide-react'
 
 interface CodeEditorProps {
     documentKey: string
     title: string
     userRole: 'teacher' | 'student'
+    userZCode: string
     readOnly?: boolean
     onExecute?: (code: string) => void
     height?: string
@@ -18,6 +19,7 @@ export const CodeEditor: React.FC<CodeEditorProps> = ({
                                                           documentKey,
                                                           title,
                                                           userRole,
+                                                          userZCode,
                                                           readOnly = false,
                                                           onExecute,
                                                           height = '400px',
@@ -26,7 +28,9 @@ export const CodeEditor: React.FC<CodeEditorProps> = ({
     const editorRef = useRef<editor.IStandaloneCodeEditor | null>(null)
     const [isExecuting, setIsExecuting] = useState(false)
     const [isEditorReady, setIsEditorReady] = useState(false)
-    const [currentDocumentKey, setCurrentDocumentKey] = useState(documentKey)
+    const [hasSetInitialContent, setHasSetInitialContent] = useState(false)
+
+    console.log(`[CodeEditor] Rendering ${documentKey} for ${userRole}:${userZCode}`)
 
     const monaco = useMonaco()
 
@@ -36,29 +40,28 @@ export const CodeEditor: React.FC<CodeEditorProps> = ({
         bindToMonaco,
         getCurrentContent,
         setInitialContent,
-        sendYjsSyncRequest
+        sendYjsSyncRequest,
+        canEdit,
+        syncStatus
     } = useYjsCodeEditor({
-        documentKey
+        documentKey,
+        userZCode,
+        userRole
     })
 
+    const finalReadOnly = readOnly || !canEdit
 
     useEffect(() => {
         if (monaco && isEditorReady) {
-            console.log('[CodeEditor] Monaco is available, configuring Python autocomplete')
+            console.log('[CodeEditor] Monaco available, configuring Python autocomplete')
             configurePythonAutocomplete(monaco)
         }
     }, [monaco, isEditorReady])
 
-
     const configurePythonAutocomplete = (monaco: any) => {
-        console.log('[CodeEditor] Configuring Python autocomplete...')
-
         try {
-
             monaco.languages.registerCompletionItemProvider('python', {
                 provideCompletionItems: function (model: any, position: any) {
-                    console.log('[CodeEditor] Providing completions at position:', position)
-
                     const word = model.getWordUntilPosition(position)
                     const range = {
                         startLineNumber: position.lineNumber,
@@ -142,75 +145,61 @@ export const CodeEditor: React.FC<CodeEditorProps> = ({
                         }
                     ]
 
-                    console.log('[CodeEditor] Returning', suggestions.length, 'suggestions')
                     return { suggestions }
                 }
             })
-
-            console.log('[CodeEditor] Python completion provider registered successfully')
-
         } catch (error) {
             console.error('[CodeEditor] Error registering completion provider:', error)
         }
     }
 
-
     useEffect(() => {
-        if (currentDocumentKey !== documentKey && isEditorReady && editorRef.current) {
-            console.log(`[CodeEditor] Document key changed from ${currentDocumentKey} to ${documentKey}`)
-            setCurrentDocumentKey(documentKey)
-
-
-            bindToMonaco(editorRef.current)
-
-
+        if (isEditorReady && isConnected && initialContent && !hasSetInitialContent) {
+            const currentContent = getCurrentContent()
+            if (currentContent.length === 0) {
+                console.log(`[CodeEditor] Setting initial content for ${documentKey}`)
+                setInitialContent(initialContent)
+                setHasSetInitialContent(true)
+            }
         }
-    }, [documentKey, currentDocumentKey, isEditorReady, bindToMonaco])
-
-    useEffect(() => {
-        if (isEditorReady && isConnected && initialContent && currentDocumentKey === documentKey) {
-            const timer = setTimeout(() => {
-                const currentContent = getCurrentContent()
-                if (currentContent.length === 0) {
-                    console.log(`[CodeEditor] Setting initial content for ${documentKey} after sync delay`)
-                    setInitialContent(initialContent)
-                }
-            }, 1000)
-
-            return () => clearTimeout(timer)
-        }
-    }, [isEditorReady, isConnected, initialContent, currentDocumentKey, documentKey, getCurrentContent, setInitialContent])
+    }, [isEditorReady, isConnected, initialContent, hasSetInitialContent, getCurrentContent, setInitialContent, documentKey])
 
     const handleEditorDidMount = (editorInstance: editor.IStandaloneCodeEditor) => {
         console.log(`[CodeEditor] Monaco editor mounted for ${documentKey}`)
         editorRef.current = editorInstance
 
+
         editorInstance.updateOptions({
             fontSize: 14,
             minimap: { enabled: false },
             lineNumbers: 'on',
-            readOnly,
+            readOnly: finalReadOnly,
             theme: 'vs-dark',
             wordWrap: 'on',
             automaticLayout: true,
             scrollBeyondLastLine: false,
             cursorBlinking: 'smooth',
-            renderWhitespace: 'selection'
+            renderWhitespace: 'selection',
+            folding: true,
+            matchBrackets: 'always',
+            tabSize: 4,
+            insertSpaces: true,
+            detectIndentation: false,
         })
 
         bindToMonaco(editorInstance)
         setIsEditorReady(true)
 
-        console.log(`[CodeEditor] Ready for ${documentKey}, readOnly: ${readOnly}`)
+        console.log(`[CodeEditor] Ready for ${documentKey}, readOnly: ${finalReadOnly}`)
     }
 
     const handleExecute = async () => {
-        if (!onExecute || isExecuting || !isConnected) return
+        if (!onExecute || isExecuting || !isConnected || !canEdit) return
 
         setIsExecuting(true)
         try {
             const code = getCurrentContent()
-            console.log(`[CodeEditor] Executing code for ${documentKey}:`, code.substring(0, 100) + '...')
+            console.log(`[CodeEditor] Executing code for ${documentKey}`)
             await onExecute(code)
         } catch (error) {
             console.error('[CodeEditor] Code execution failed:', error)
@@ -263,21 +252,65 @@ export const CodeEditor: React.FC<CodeEditorProps> = ({
         }
     }
 
-    const getRoleIcon = () => {
+    const getSyncStatusIcon = () => {
+        switch (syncStatus) {
+            case 'synced':
+                return <CheckCircle size={14} className="text-success" />
+            case 'syncing':
+                return <RotateCw size={14} className="text-warning animate-spin" />
+            case 'conflict':
+                return <AlertCircle size={14} className="text-warning" />
+            case 'offline':
+                return <WifiOff size={14} className="text-secondary" />
+            default:
+                return <AlertCircle size={14} className="text-secondary" />
+        }
+    }
+
+    const getSyncStatusText = () => {
+        switch (syncStatus) {
+            case 'synced':
+                return 'Synced'
+            case 'syncing':
+                return 'Syncing...'
+            case 'conflict':
+                return 'Conflict'
+            case 'offline':
+                return 'Offline'
+            default:
+                return 'Unknown'
+        }
+    }
+
+    const getPermissionIcon = () => {
         if (userRole === 'teacher') {
             return <Users size={16} className="text-primary" />
         }
-        return null
+
+        if (finalReadOnly) {
+            if (!isConnected) {
+                return <Lock size={16} className="text-danger" />
+            }
+            return <Eye size={16} className="text-warning" />
+        }
+
+        return <CheckCircle size={16} className="text-success" />
     }
 
-    const getStatusIcon = () => {
-        if (!isEditorReady) {
-            return <div className="spinner-border spinner-border-sm text-secondary" style={{ width: '14px', height: '14px' }} />
+    const getStatusBadges = () => {
+        const badges = []
+
+        if (finalReadOnly) {
+            if (!isConnected) {
+                badges.push(<span key="offline" className="badge bg-danger text-xs">Offline</span>)
+            } else if (!canEdit) {
+                badges.push(<span key="readonly" className="badge bg-warning text-xs">View Only</span>)
+            } else {
+                badges.push(<span key="forced-readonly" className="badge bg-secondary text-xs">Read Only</span>)
+            }
         }
-        if (isConnected && isEditorReady) {
-            return <CheckCircle size={14} className="text-success" />
-        }
-        return <AlertCircle size={14} className="text-warning" />
+
+        return badges
     }
 
     return (
@@ -286,22 +319,20 @@ export const CodeEditor: React.FC<CodeEditorProps> = ({
                 <div className="d-flex justify-content-between align-items-center">
                     <div className="d-flex align-items-center gap-2">
                         <h5 className="card-title mb-0">{title}</h5>
-                        {getRoleIcon()}
-                        {readOnly && (
-                            <span className="badge bg-secondary text-xs">Read Only</span>
-                        )}
+                        {getPermissionIcon()}
+                        {getStatusBadges()}
                     </div>
 
                     <div className="d-flex align-items-center gap-3">
-                        {/* Editor Status */}
+                        {/* 同步状态 */}
                         <div className="d-flex align-items-center gap-1">
-                            {getStatusIcon()}
+                            {getSyncStatusIcon()}
                             <small className="text-muted">
-                                {!isEditorReady ? 'Loading...' : 'Ready'}
+                                {getSyncStatusText()}
                             </small>
                         </div>
 
-                        {/* Connection Status */}
+                        {/* connection status */}
                         <div className="d-flex align-items-center gap-1">
                             {getConnectionIcon()}
                             <small className={getConnectionTextClass()}>
@@ -309,7 +340,7 @@ export const CodeEditor: React.FC<CodeEditorProps> = ({
                             </small>
                         </div>
 
-                        {/* Force Sync Button */}
+                        {/* syc button */}
                         <button
                             onClick={handleForceSync}
                             className="btn btn-outline-info btn-sm d-flex align-items-center gap-1"
@@ -319,19 +350,19 @@ export const CodeEditor: React.FC<CodeEditorProps> = ({
                             <RefreshCw size={14} />
                         </button>
 
-                        {/* Execute Button */}
+                        {/* execute button */}
                         {onExecute && (
                             <button
                                 onClick={handleExecute}
-                                disabled={!isConnected || !isEditorReady || isExecuting || readOnly}
+                                disabled={!isConnected || !isEditorReady || isExecuting || finalReadOnly}
                                 className="btn btn-success btn-sm d-flex align-items-center gap-1"
                                 title={
                                     !isConnected
                                         ? 'Not connected'
                                         : !isEditorReady
                                             ? 'Editor not ready'
-                                            : readOnly
-                                                ? 'Read only mode'
+                                            : finalReadOnly
+                                                ? 'No edit permission'
                                                 : 'Execute code'
                                 }
                             >
@@ -363,7 +394,7 @@ export const CodeEditor: React.FC<CodeEditorProps> = ({
                             </div>
                         }
                         options={{
-                            readOnly,
+                            readOnly: finalReadOnly,
                             fontSize: 14,
                             minimap: { enabled: false },
                             scrollBeyondLastLine: false,
@@ -382,12 +413,12 @@ export const CodeEditor: React.FC<CodeEditorProps> = ({
                 </div>
             </div>
 
-            {/* Footer with additional info */}
+            {/* status */}
             {(connectionStatus === 'error' || (!isConnected && connectionStatus !== 'connecting')) && (
                 <div className="card-footer bg-light py-2">
                     <small className="text-danger d-flex align-items-center gap-1">
                         <AlertCircle size={12} />
-                        Connection lost. Attempting to reconnect...
+                        Connection lost. Document is read-only until reconnected.
                     </small>
                 </div>
             )}
@@ -397,6 +428,24 @@ export const CodeEditor: React.FC<CodeEditorProps> = ({
                     <small className="text-warning d-flex align-items-center gap-1">
                         <div className="spinner-border spinner-border-sm" style={{ width: '12px', height: '12px' }} />
                         Connecting to classroom...
+                    </small>
+                </div>
+            )}
+
+            {syncStatus === 'syncing' && isConnected && (
+                <div className="card-footer bg-light py-2">
+                    <small className="text-info d-flex align-items-center gap-1">
+                        <RotateCw size={12} className="animate-spin" />
+                        Synchronizing document...
+                    </small>
+                </div>
+            )}
+
+            {syncStatus === 'conflict' && (
+                <div className="card-footer bg-light py-2">
+                    <small className="text-warning d-flex align-items-center gap-1">
+                        <AlertCircle size={12} />
+                        Document conflicts detected. Auto-resolving...
                     </small>
                 </div>
             )}

@@ -179,8 +179,8 @@ const ClassManagement = () => {
         setEditingLecture({ ...lecture });
     };
 
-    const handleEnterClassroom = (lectureId: number, lecturerZcode:string) => {
-        navigate(`/classroom/${lectureId}/${lecturerZcode}`);
+    const handleEnterClassroom = (lectureId: number, lecturerZcode:string,lectureName:string) => {
+        navigate(`/classroom/${lectureId}/${lecturerZcode}/${lectureName}`);
     };
 
     if (loading) {
@@ -435,7 +435,7 @@ const ClassManagement = () => {
                                                 </div>
                                                 <div className="d-flex gap-2">
                                                     <button
-                                                        onClick={() => handleEnterClassroom(lecture.lecture_id,lecture.lecturer_z_code_id)}
+                                                        onClick={() => handleEnterClassroom(lecture.lecture_id,lecture.lecturer_z_code_id,lecture.lecture_name)}
                                                         className="btn btn-sm btn-success"
                                                         title="Enter Online Classroom"
                                                     >

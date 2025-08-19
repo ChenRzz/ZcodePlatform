@@ -14,6 +14,7 @@ type JoinClassroomRequest struct {
 	ZCode         string `json:"zcode" binding:"required"`
 	LecturerZcode string `json:"lecturer_zcode" binding:"required"`
 	Name          string `json:"name"`
+	LectureName   string `json:"lecture_name" binding:"required"`
 }
 
 type JoinClassroomResponse struct {
@@ -40,13 +41,14 @@ func JoinClassroomHandler(c *gin.Context) {
 		userrole = "teacher"
 	}
 	log.Println(req, userrole)
-	wsURL := "ws://localhost:8081/ws/classroom/" + strconv.Itoa(int(req.LectureID)) +
+	wsURL := "ws://51.107.216.21:8081/ws/classroom/" + strconv.Itoa(int(req.LectureID)) +
 		"?zcode=" + req.ZCode + "&role=" + userrole + "&name=" + req.Name
 
 	c.JSON(http.StatusOK, JoinClassroomResponse{
 		Success: true,
 		Data: gin.H{
 			"lecture_id":    req.LectureID,
+			"lecture_name":  req.LectureName,
 			"user_zcode":    req.ZCode,
 			"user_name":     req.Name,
 			"user_role":     userrole,

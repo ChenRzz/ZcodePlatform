@@ -42,10 +42,10 @@ func (u *UserApplication) Register(username, password, email string) error {
 			return err
 		}
 		sql = `INSERT INTO user_role (user_id, role_id, created_at, is_delete)
-		VALUES (?, ?, NOW(), 0)`
-		err = tx.Exec(sql, userid, 4).Error
+VALUES (?, (SELECT id FROM role WHERE role_name = 'Student' LIMIT 1), NOW(), 0)`
+		err = tx.Exec(sql, userid).Error
 		if err != nil {
-			fmt.Println("添加角色失败:", err)
+			fmt.Println("failed to add role to user:", err)
 			return err
 		}
 		return nil

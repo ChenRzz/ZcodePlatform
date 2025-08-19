@@ -55,9 +55,9 @@ const ClassDetails = () => {
         }
     };
 
-    const handleEnterLecture = (lectureId: number,lecturerZcode:string) => {
+    const handleEnterLecture = (lectureId: number,lecturerZcode:string,lectureName:string) => {
         if (!classInfo || !isClassJoined(classInfo.class_code)) return;
-        navigate(`/classroom/${lectureId}/${lecturerZcode}`);
+        navigate(`/classroom/${lectureId}/${lecturerZcode}/${lectureName}`);
     };
 
     if (loading) {
@@ -188,7 +188,7 @@ const ClassDetails = () => {
 
                                                 <div className="flex-shrink-0">
                                                     <button
-                                                        onClick={() => handleEnterLecture(lecture.lecture_id,lecture.lecturer_z_code_id)}
+                                                        onClick={() => handleEnterLecture(lecture.lecture_id,lecture.lecturer_z_code_id,lecture.lecture_name)}
                                                         disabled={!hasJoined}
                                                         className={`btn btn-sm ${
                                                             hasJoined

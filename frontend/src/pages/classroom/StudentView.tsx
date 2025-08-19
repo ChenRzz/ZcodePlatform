@@ -30,6 +30,7 @@ const StudentViewContent: React.FC<StudentViewProps> = ({ classroomData }) => {
     const lectureId = classroomData.lecture_id
     const studentZcode = classroomData.user_zcode
     const studentName = classroomData.user_name
+    const lectureName=classroomData.lecture_name
 
     const [currentState, setCurrentState] = useState<ClassroomState | null>(null)
     const [teacherExecutionResults, setTeacherExecutionResults] = useState<ExecutionResult[]>([])
@@ -193,7 +194,7 @@ const StudentViewContent: React.FC<StudentViewProps> = ({ classroomData }) => {
                             <div className="d-flex justify-content-between align-items-center">
                                 <div>
                                     <h1 className="h4 mb-2 d-flex align-items-center">
-                                        📚 Online Classroom #{lectureId}
+                                        📚 {lectureName} #{lectureId}
                                     </h1>
                                     <p className="text-muted mb-0">
                                         Student: {studentName} ({studentZcode}) | Teacher: {teacherName} |
@@ -263,6 +264,7 @@ const StudentViewContent: React.FC<StudentViewProps> = ({ classroomData }) => {
                                         documentKey="teacher-code"
                                         title="👨‍🏫 Teacher Demo"
                                         userRole="student"
+                                        userZCode={studentZcode}
                                         readOnly={true}
                                         height="240px"
                                     />
@@ -286,6 +288,7 @@ const StudentViewContent: React.FC<StudentViewProps> = ({ classroomData }) => {
                                         documentKey={`student-${userZcode}`}
                                         title="✏️ My Practice"
                                         userRole="student"
+                                        userZCode={studentZcode}
                                         onExecute={handleExecuteMyCode}
                                         height="280px"
                                     />

@@ -1,0 +1,49 @@
+version: "3.8"
+
+services:
+  redis:
+    image: redis:latest
+    container_name: msc-redis
+    ports:
+      - "6379:6379"
+    networks:
+      - app-network
+
+  mysql:
+    image: mysql:8.0
+    container_name: msc-mysql
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: msc432
+      MYSQL_DATABASE: MscProject
+    ports:
+      - "3306:3306"
+    volumes:
+      - ./database:/docker-entrypoint-initdb.d/
+    networks:
+      - app-network
+
+  backend:
+    build: ./backend
+    container_name: msc-backend
+    ports:
+      - "8081:8081"
+    depends_on:
+      - mysql
+      - redis
+    networks:
+      - app-network
+
+  frontend:
+    build: ./frontend
+    container_name: msc-frontend
+    ports:
+      - "80:80"
+    depends_on:
+      - backend
+    networks:
+      - app-network
+
+networks:
+  app-network:
+    driver: bridge

@@ -60,7 +60,7 @@ export const WebSocketProvider: React.FC<WebSocketProviderProps> = ({
     const eventListeners = useRef<Map<string, Set<(data: any) => void>>>(new Map())
 
     useEffect(() => {
-        const wsUrl = `ws://localhost:8081/ws/classroom/${lectureId}?zcode=${userZCode}&role=${userRole}&name=${encodeURIComponent(userName)}`
+        const wsUrl = `ws://51.107.216.21:8081/ws/classroom/${lectureId}?zcode=${userZCode}&role=${userRole}&name=${encodeURIComponent(userName)}`
 
         console.log(`[WebSocket] Connecting to: ${wsUrl}`)
         setConnectionStatus('connecting')
