@@ -1,3 +1,4 @@
+# 使用官方Go镜像作为构建环境
 FROM golang:1.23-alpine AS builder
 
 # 设置工作目录
@@ -18,8 +19,8 @@ RUN CGO_ENABLED=0 GOOS=linux go build -o main .
 # 使用轻量级镜像作为运行环境
 FROM alpine:latest
 
-# 安装ca-certificates（用于HTTPS请求）
-RUN apk --no-cache add ca-certificates
+# 安装ca-certificates和Docker客户端
+RUN apk --no-cache add ca-certificates docker-cli
 
 WORKDIR /root/
 
