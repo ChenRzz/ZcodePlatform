@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"context"
 	"fmt"
+	"log"
 	"os"
 	"os/exec"
 	"path/filepath"
@@ -62,12 +63,24 @@ func (pe *PythonExecutor) Execute(code string, config ExecutionConfig) (*Executi
 
 func (pe *PythonExecutor) createTempPythonFile(code string) (string, error) {
 	tempDir := os.TempDir()
+	log.Printf("DEBUG: Temp dir: %s", tempDir)
+
 	fileName := fmt.Sprintf("python_exec_%s.py", generateExecutionID())
 	filePath := filepath.Join(tempDir, fileName)
+	log.Printf("DEBUG: File path: %s", filePath)
+	log.Printf("DEBUG: Code to write: %s", code)
 
 	err := os.WriteFile(filePath, []byte(code), 0644)
 	if err != nil {
+		log.Printf("ERROR: WriteFile failed: %v", err)
 		return "", err
+	}
+
+	if stat, err := os.Stat(filePath); err != nil {
+		log.Printf("ERROR: Stat failed: %v", err)
+		return "", err
+	} else {
+		log.Printf("DEBUG: File created successfully: %s, IsDir: %v, Size: %d", filePath, stat.IsDir(), stat.Size())
 	}
 
 	return filePath, nil
