@@ -42,7 +42,7 @@ func (u *UserApplication) Register(username, password, email string) error {
 			return err
 		}
 		sql = `INSERT INTO user_role (user_id, role_id, created_at, is_delete)
-VALUES (?, (SELECT id FROM role WHERE role_name = 'Student' LIMIT 1), NOW(), 0)`
+VALUES (?, (SELECT id FROM roles WHERE role_name = 'Student' LIMIT 1), NOW(), 0)`
 		err = tx.Exec(sql, userid).Error
 		if err != nil {
 			fmt.Println("failed to add role to user:", err)
